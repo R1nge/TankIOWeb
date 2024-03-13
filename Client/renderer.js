@@ -5,7 +5,7 @@ const deltaTime = 1 / frameRate;
 
 
 const bulletSpeed = 5;
-const bulletEntity = createBullet(
+const bulletEntity = new BulletEntity(
     5, 
     canvas.width / 2 , 
     canvas.height / 2,
