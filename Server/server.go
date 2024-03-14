@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+    "encoding/json"
 
 	"github.com/gorilla/websocket"
 )
@@ -42,6 +43,10 @@ func listen(conn *websocket.Conn) {
 
 		// print out that message
 		fmt.Println(string(messageContent))
+		
+        var data playerInput
+		json.Unmarshal([]byte(string(messageContent)), &data)
+        fmt.Printf("Horizontal: %f", data.Horizontal)
 
 		// just echo the received message
 		messageResponse := fmt.Sprintf("Your message is: %s. Time received : %v", messageContent, timeReceive)
@@ -50,6 +55,14 @@ func listen(conn *websocket.Conn) {
 			log.Println(err)
 			return
 		}
-
 	}
+}
+
+
+type playerInput struct {
+    Horizontal float64 `json:"horizontal"`
+    Vertical float64 `json:"vertical"`
+    IsShooting bool `json:"isShooting"`
+    MousePositionX float64 `json:mousePositionX`
+    MousePositionY float64 `json:mousePositionY`
 }
