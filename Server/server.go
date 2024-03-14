@@ -33,13 +33,13 @@ func main() {
     http.ListenAndServe(":8080", nil)
 }
 
-var players = make(map[int]player)
+var players = make(map[int]*player)
 
 
 func addPlayer (player player) {
     fmt.Println("Adding player:", player)
     i, _:= strconv.Atoi(player.ID)
-    players[i] = player
+    players[i] = &player
     
     
     for k, v := range players {
@@ -51,7 +51,7 @@ func removePlayer (id int) {
     delete(players, id)
 }
 
-func getPlayer(id int) player {
+func getPlayer(id int) *player {
     return players[id]   
 }
 
@@ -111,10 +111,18 @@ func listen(conn * websocket.Conn) {
             //TODO: send new position
             
             player := getPlayer(0)
+            
+            if player == nil {
+                fmt.Println("Player not found")
+                return
+            }
+            
+            fmt.Println("Player found:", player)
             player.PositionX += int(data.Horizontal)
             player.PositionY -= int(data.Vertical)
-            
             fmt.Println("Player position:", player.PositionX, player.PositionY)
+                
+            
 
             dataJson, _:= json.Marshal(player)
 
