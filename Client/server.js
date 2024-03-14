@@ -8,22 +8,27 @@ socket.onopen = function (e) {
     }
     
     console.log(`Connected to server. Data sent: ${input}`);
-    sendToServer(input);
+    sendToServer(input, message_type.move);
 };
 
 socket.onmessage = function (event) {
     
-    if(event.data.startsWith("Move: ")) {
-        console.log(`${event.data}`);
+    if(event.data.startsWith("Move")) {
+        console.log(`Move message received: ${event.data}`);
         return;
     }
     
     console.log(`received a message: ${event.data}`);
 }
 
-export function sendToServer(dataStruct) {
-    console.log(`Send to server data: ${dataStruct}`);
+export function sendToServer(dataStruct, messageType) {
     const json = JSON.stringify(dataStruct);
     console.log(`Send to server json sent: ${json}`);
-    socket.send(json);
+    socket.send(messageType + json);
+}
+
+const message_type = {
+    join: "Join",
+    move: "Move",
+    leave: "Leave"
 }

@@ -35,7 +35,7 @@ window.addEventListener('keydown', function (event) {
         playerEntity.move(playerSpeed, 1, 0, deltaTime);
     }
 
-    sendToServer(data);
+    sendToServer(data, "Move");
 });
 
 function render() {

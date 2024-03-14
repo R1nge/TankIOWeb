@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
     "encoding/json"
+    "strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -43,44 +44,52 @@ func listen(conn *websocket.Conn) {
 		fmt.Println("\n")
 		
 		fmt.Println("Received message:", string(messageContent))
+		commandType := strings.Split(string(messageContent), "{")[0]
+		fmt.Println("Command type:", commandType)
+		command := strings.Split(string(messageContent), "{")[1]
+        command = "{" + command
+		fmt.Println("Command:", command)
 		
-        var data playerInput
-		json.Unmarshal([]byte(string(messageContent)), &data)
-		
-		if data.Horizontal > 1 {
-            data.Horizontal = 1
-        }
-            
-        if data.Horizontal < 0 {
-            data.Horizontal = 0
-        }
+		if commandType == "Move" {
+    	 var data playerInput
+    	 
+        		json.Unmarshal([]byte(string(command)), &data)
+        		
+        		if data.Horizontal > 1 {
+                    data.Horizontal = 1
+                }
+                    
+                if data.Horizontal < -1 {
+                    data.Horizontal = -1
+                }
+                
+                if data.Vertical > 1 {
+                    data.Vertical = 1
+                }
+                
+                if data.Vertical < -1 {
+                    data.Vertical = -1
+                }
         
-        if data.Vertical > 1 {
-            data.Vertical = 1
-        }
+                fmt.Printf("Horizontal: %f ", data.Horizontal)
+                fmt.Printf("Vertical: %f ", data.Vertical)
+                fmt.Printf("IsShooting: %t ", data.IsShooting)
+                fmt.Printf("MouseX: %f ", data.MousePositionX)
+                fmt.Printf("MouseY: %f ", data.MousePositionY)
+                
+                //TODO: apply input (Calculate new position)
+                //TODO: send new position
+        		
+        		dataJson, _ := json.Marshal(data)
+        		
+        		messageResponse := fmt.Sprintf("Move: %s", dataJson)
         
-        if data.Vertical < 0 {
-            data.Vertical = 0
-        }
-
-        fmt.Printf("Horizontal: %f ", data.Horizontal)
-        fmt.Printf("Vertical: %f ", data.Vertical)
-        fmt.Printf("IsShooting: %t ", data.IsShooting)
-        fmt.Printf("MouseX: %f ", data.MousePositionX)
-        fmt.Printf("MouseY: %f ", data.MousePositionY)
-        
-        //TODO: apply input (Calculate new position)
-        //TODO: send new position
-
-		// just echo the received message
-		
-		dataJson, err := json.Marshal(data)
-		
-		messageResponse := fmt.Sprintf("Move: %s", dataJson)
-
-		if err := conn.WriteMessage(messageType, []byte(messageResponse)); err != nil {
-			log.Println(err)
-			return
+        		if err := conn.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+        			log.Println(err)
+        			return
+        		}	
+		}else {
+		    fmt.Println("Unknown command type:", commandType)
 		}
 	}
 }
