@@ -41,6 +41,11 @@ func addPlayer (player player) {
     fmt.Println("Adding player:", player)
     i, _:= strconv.Atoi(player.ID)
     players[i] = player
+    
+    
+    for k, v := range players {
+        fmt.Println(k, v)
+    }
 }
 
 func removePlayer (id int) {

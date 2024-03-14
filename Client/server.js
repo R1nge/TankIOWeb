@@ -2,7 +2,8 @@
 
 socket.onopen = function (e) {
 
-    const input = {id: "123", name: "test"}
+    const id = Math.floor(Math.random() * 1000)
+    const input = {id: id.toString(), name: "test"}
     
     console.log(`Connected to server. Data sent: ${input}`);
     sendToServer(input, message_type.join);
