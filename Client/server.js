@@ -1,17 +1,8 @@
 ﻿import {ctx, render} from "./renderer.js";
 import {PlayerEntity} from "./playerEntity.js";
+import {Constants} from "./constants.js"; 
 
 let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
-const frameRate = 60;
-const deltaTime = 1 / frameRate;
-
-
-const player = {
-    id: "0", //id.toString(), 
-    name: "test",
-    positionX: 0,
-    positionY: 0
-}
 
 socket.onopen = function (e) {
 
@@ -19,16 +10,6 @@ socket.onopen = function (e) {
 
     console.log(`Connected to server. Data sent: ${player}`);
     sendToServer(player, message_type.join);
-};
-
-function getPlayerId() {
-    return 0
-}
-
-
-let position = {
-    positionX: 0,
-    positionY: 0
 };
 
 socket.onmessage = function (event) {
@@ -45,6 +26,23 @@ socket.onmessage = function (event) {
 
     console.log(`received a message: ${event.data}`);
 }
+
+const player = {
+    id: "0", //id.toString(), 
+    name: "test",
+    positionX: 0,
+    positionY: 0
+}
+
+
+function getPlayerId() {
+    return 0
+}
+
+let position = {
+    positionX: 0,
+    positionY: 0
+};
 
 function getPosition() {
     return position;
@@ -93,16 +91,14 @@ window.addEventListener('keydown', function (event) {
 });
 
 function gameLoop() {
-    render(deltaTime);
+    render(Constants.deltaTime);
     playerEntity.draw(ctx);
-
-    console.log("game loop");
     
     if (getPosition() === undefined || getPosition() === null || getPosition().positionX === 0 && getPosition().positionY === 0 || getPosition().positionX === undefined || getPosition().positionY === undefined) {
         return;
     }
 
-    playerEntity.moveTo(getPosition().positionX, getPosition().positionY, deltaTime);
+    playerEntity.moveTo(getPosition().positionX, getPosition().positionY, Constants.deltaTime);
 }
 
-setInterval(gameLoop, deltaTime);
+setInterval(gameLoop, Constants.deltaTime);
