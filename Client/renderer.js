@@ -1,5 +1,4 @@
-﻿import {sendToServer} from "./server.js";
-import {getLastInput} from "./server.js";
+﻿import {getPosition, sendToServer} from "./server.js";
 
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
@@ -8,7 +7,7 @@ const frameRate = 60;
 const deltaTime = 1 / frameRate;
 
 const playerSpeed = 250;
-const playerEntity = new PlayerEntity(10, 100, 100, "white");
+const playerEntity = new PlayerEntity(10, 0, 0, "white");
 
 window.addEventListener('keydown', function (event) {
 
@@ -42,11 +41,11 @@ window.addEventListener('keydown', function (event) {
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     playerEntity.draw(ctx);
-    if(getLastInput() === undefined || getLastInput() === null || getLastInput().horizontal === 0 && getLastInput().vertical === 0 || getLastInput().horizontal === undefined || getLastInput().vertical === undefined) {
+    if(getPosition() === undefined || getPosition() === null || getPosition().positionX === 0 && getPosition().positionY === 0 || getPosition().positionX === undefined || getPosition().positionY === undefined) {
         return;
     }
-    console.log("Move: " + getLastInput().horizontal + " " + getLastInput().vertical);
-    playerEntity.move(playerSpeed, getLastInput().horizontal, getLastInput().vertical, deltaTime);
+    console.log("Move: " + getPosition().positionX + " " + getPosition().positionY);
+    playerEntity.move(playerSpeed, getPosition().positionX, getPosition().positionY, deltaTime);
 }
 
 setInterval(render, deltaTime);
