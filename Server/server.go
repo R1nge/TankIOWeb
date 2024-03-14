@@ -113,10 +113,14 @@ func listen(conn * websocket.Conn) {
             player := getPlayer(0)
             player.PositionX += int(data.Horizontal)
             player.PositionY -= int(data.Vertical)
+            
+            fmt.Println("Player position:", player.PositionX, player.PositionY)
 
             dataJson, _:= json.Marshal(player)
 
             messageResponse:= fmt.Sprintf("Move: %s", dataJson)
+            
+            fmt.Println("Sending message: %s", dataJson)
 
             if err:= conn.WriteMessage(messageType, []byte(messageResponse));
             err != nil {

@@ -7,7 +7,7 @@ const frameRate = 60;
 const deltaTime = 1 / frameRate;
 
 const playerSpeed = 250;
-const playerEntity = new PlayerEntity(10, 0, 0, "white");
+const playerEntity = new PlayerEntity(10, 200, 200, "white");
 
 window.addEventListener('keydown', function (event) {
 
@@ -46,7 +46,7 @@ function render() {
         return;
     }
     console.log("Move: " + getPosition().positionX + " " + getPosition().positionY);
-    playerEntity.move(playerSpeed, getPosition().positionX, getPosition().positionY, deltaTime);
+    playerEntity.moveTo(playerSpeed, getPosition().positionX, getPosition().positionY, deltaTime);
 }
 
 setInterval(render, deltaTime);

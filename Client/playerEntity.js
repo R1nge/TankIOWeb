@@ -14,8 +14,8 @@
         ctx.closePath();
     }
 
-    move(speed, directionX, directionY, deltaTime) {
-        this.x += speed * directionX * deltaTime;
-        this.y -= speed * directionY * deltaTime;
+    moveTo(speed, directionX, directionY, deltaTime) {
+        this.x = speed * directionX * deltaTime;
+        this.y = speed * directionY * deltaTime;
     }
 }

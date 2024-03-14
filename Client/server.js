@@ -32,8 +32,8 @@ socket.onmessage = function (event) {
         const data = event.data.substring(event.data.indexOf("{"));
         const parsedData = JSON.parse(data);
         console.log(data)
-        position.positionX = parsedData.positionX;
-        position.positionY = parsedData.positionY;
+        position.positionX += parsedData.positionX;
+        position.positionY += parsedData.positionY;
         console.log(`Move message received: ${position.positionX} ${position.positionY}`);
     }
     
@@ -41,6 +41,7 @@ socket.onmessage = function (event) {
 }
 
 export function getPosition() {
+    console.log(`Position received: ${position.positionX} ${position.positionY}`);
     return position;
 } 
 
