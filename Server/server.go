@@ -47,6 +47,22 @@ func listen(conn *websocket.Conn) {
 		
         var data playerInput
 		json.Unmarshal([]byte(string(messageContent)), &data)
+		
+		if data.Horizontal > 1 {
+            data.Horizontal = 1
+        }
+            
+        if data.Horizontal < 0 {
+            data.Horizontal = 0
+        }
+        
+        if data.Vertical > 1 {
+            data.Vertical = 1
+        }
+        
+        if data.Vertical < 0 {
+            data.Vertical = 0
+        }
 
         fmt.Printf("Horizontal: %f ", data.Horizontal)
         fmt.Printf("Vertical: %f ", data.Vertical)

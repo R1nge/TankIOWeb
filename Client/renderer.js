@@ -1,4 +1,4 @@
-﻿import { sendToServer } from "./server.js";
+﻿import {sendToServer} from "./server.js";
 
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
@@ -16,25 +16,32 @@ const bulletEntity = new BulletEntity(
 );
 
 window.addEventListener('keydown', function (event) {
-    
+
     let data = {
-        horizontal: 69,
-        vertical: 1337
+        horizontal: 0,
+        vertical: 0,
+        isShooting: false,
+        mousePositionX: 0,
+        mousePositionY: 0
     }
-    
-    
+
     const key = event.key;
     console.log("pressed: " + key);
     if (key === "w") {
-        sendToServer(data);
-        bulletEntity.move(bulletSpeed, 0, 10, deltaTime);
+        data.vertical = 1;
+        bulletEntity.move(bulletSpeed, 0, 1, deltaTime);
     } else if (key === "a") {
-        bulletEntity.move(bulletSpeed, -10, 0, deltaTime);
+        data.horizontal = -1;
+        bulletEntity.move(bulletSpeed, -1, 0, deltaTime);
     } else if (key === "s") {
-        bulletEntity.move(bulletSpeed, 0, -10, deltaTime);
+        data.vertical = -1;
+        bulletEntity.move(bulletSpeed, 0, -1, deltaTime);
     } else if (key === "d") {
-        bulletEntity.move(bulletSpeed, 10, 0, deltaTime);
+        data.horizontal = 1;
+        bulletEntity.move(bulletSpeed, 1, 0, deltaTime);
     }
+
+    sendToServer(data);
 });
 
 function render() {
