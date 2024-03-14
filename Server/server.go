@@ -57,7 +57,6 @@ func getPlayer(id int) *player {
 
 func listen(conn * websocket.Conn) {
     for {
-        // read a message
         messageType, messageContent, err:= conn.ReadMessage()
 
         if err != nil {
@@ -106,9 +105,6 @@ func listen(conn * websocket.Conn) {
             fmt.Printf("IsShooting: %t ", data.IsShooting)
             fmt.Printf("MouseX: %f ", data.MousePositionX)
             fmt.Printf("MouseY: %f ", data.MousePositionY)
-
-            //TODO: apply input (Calculate new position)
-            //TODO: send new position
             
             player := getPlayer(0)
             
@@ -117,12 +113,9 @@ func listen(conn * websocket.Conn) {
                 return
             }
             
-            fmt.Println("Player found:", player)
             player.PositionX += int(data.Horizontal)
             player.PositionY -= int(data.Vertical)
             fmt.Println("Player position:", player.PositionX, player.PositionY)
-                
-            
 
             dataJson, _:= json.Marshal(player)
 

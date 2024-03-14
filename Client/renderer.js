@@ -24,28 +24,27 @@ window.addEventListener('keydown', function (event) {
     console.log("pressed: " + key);
     if (key === "w") {
         data.vertical = 1;
-        //    playerEntity.move(playerSpeed, 0, 1, deltaTime);
+        sendToServer(data, "Move");
     } else if (key === "a") {
         data.horizontal = -1;
-        //    playerEntity.move(playerSpeed, -1, 0, deltaTime);
+        sendToServer(data, "Move");
     } else if (key === "s") {
         data.vertical = -1;
-        //    playerEntity.move(playerSpeed, 0, -1, deltaTime);
+        sendToServer(data, "Move");
     } else if (key === "d") {
         data.horizontal = 1;
-        //    playerEntity.move(playerSpeed, 1, 0, deltaTime);
+        sendToServer(data, "Move");
     }
-
-    sendToServer(data, "Move");
 });
 
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     playerEntity.draw(ctx);
+    
     if (getPosition() === undefined || getPosition() === null || getPosition().positionX === 0 && getPosition().positionY === 0 || getPosition().positionX === undefined || getPosition().positionY === undefined) {
         return;
     }
-    console.log("Move: " + getPosition().positionX + " " + getPosition().positionY);
+    
     playerEntity.moveTo(playerSpeed, getPosition().positionX, getPosition().positionY, deltaTime);
 }
 
