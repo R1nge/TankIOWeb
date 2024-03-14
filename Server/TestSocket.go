@@ -10,10 +10,7 @@ import (
 )
 
 func main() {
-
-
-
-	var upgrader = websocket.Upgrader{
+    var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
@@ -46,7 +43,7 @@ func listen(conn *websocket.Conn) {
 		// print out that message
 		fmt.Println(string(messageContent))
 
-		// reponse message
+		// just echo the received message
 		messageResponse := fmt.Sprintf("Your message is: %s. Time received : %v", messageContent, timeReceive)
 
 		if err := conn.WriteMessage(messageType, []byte(messageResponse)); err != nil {
