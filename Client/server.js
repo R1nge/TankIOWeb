@@ -2,13 +2,10 @@
 
 socket.onopen = function (e) {
 
-    const input = {
-        horizontal: 69,
-        vertical: 1337
-    }
+    const input = {id: "123", name: "test"}
     
     console.log(`Connected to server. Data sent: ${input}`);
-    sendToServer(input, message_type.move);
+    sendToServer(input, message_type.join);
 };
 
 socket.onmessage = function (event) {

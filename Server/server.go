@@ -1,97 +1,105 @@
 ﻿package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
+    "fmt"
+    "log"
+    "net/http"
     "encoding/json"
     "strings"
 
-	"github.com/gorilla/websocket"
+    "github.com/gorilla/websocket"
 )
 
 func main() {
-    var upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-	}
-    
-    upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    var upgrader = websocket.Upgrader {
+        ReadBufferSize: 1024,
+        WriteBufferSize: 1024,
+    }
 
-		websocket, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		log.Println("Websocket Connected!")
-		listen(websocket)
-	})
-	http.ListenAndServe(":8080", nil)
+    upgrader.CheckOrigin = func(r * http.Request) bool {
+        return true
+    }
+
+    http.HandleFunc("/", func(w http.ResponseWriter, r * http.Request) {
+
+        websocket, err:= upgrader.Upgrade(w, r, nil)
+        if err != nil {
+            log.Println(err)
+            return
+        }
+        log.Println("Websocket Connected!")
+        listen(websocket)
+    })
+    http.ListenAndServe(":8080", nil)
 }
 
-func listen(conn *websocket.Conn) {
-	for {
-		// read a message
-		messageType, messageContent, err := conn.ReadMessage()
-		
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		
-		fmt.Println("\n")
-		
-		fmt.Println("Received message:", string(messageContent))
-		commandType := strings.Split(string(messageContent), "{")[0]
-		fmt.Println("Command type:", commandType)
-		command := strings.Split(string(messageContent), "{")[1]
+func listen(conn * websocket.Conn) {
+    for {
+        // read a message
+        messageType, messageContent, err:= conn.ReadMessage()
+
+        if err != nil {
+            log.Println(err)
+            return
+        }
+
+        fmt.Println("\n")
+
+        fmt.Println("Received message:", string(messageContent))
+        commandType:= strings.Split(string(messageContent), "{")[0]
+        fmt.Println("Command type:", commandType)
+        command:= strings.Split(string(messageContent), "{")[1]
         command = "{" + command
-		fmt.Println("Command:", command)
-		
-		if commandType == "Move" {
-    	 var data playerInput
-    	 
-        		json.Unmarshal([]byte(string(command)), &data)
-        		
-        		if data.Horizontal > 1 {
-                    data.Horizontal = 1
-                }
-                    
-                if data.Horizontal < -1 {
-                    data.Horizontal = -1
-                }
-                
-                if data.Vertical > 1 {
-                    data.Vertical = 1
-                }
-                
-                if data.Vertical < -1 {
-                    data.Vertical = -1
-                }
-        
-                fmt.Printf("Horizontal: %f ", data.Horizontal)
-                fmt.Printf("Vertical: %f ", data.Vertical)
-                fmt.Printf("IsShooting: %t ", data.IsShooting)
-                fmt.Printf("MouseX: %f ", data.MousePositionX)
-                fmt.Printf("MouseY: %f ", data.MousePositionY)
-                
-                //TODO: apply input (Calculate new position)
-                //TODO: send new position
-        		
-        		dataJson, _ := json.Marshal(data)
-        		
-        		messageResponse := fmt.Sprintf("Move: %s", dataJson)
-        
-        		if err := conn.WriteMessage(messageType, []byte(messageResponse)); err != nil {
-        			log.Println(err)
-        			return
-        		}	
-		}else {
-		    fmt.Println("Unknown command type:", commandType)
-		}
-	}
+        fmt.Println("Command:", command)
+
+        if commandType == "Join" {
+            var data player
+            json.Unmarshal([]byte(string(command)), & data)
+            fmt.Println("Player joined with ID:", data.ID)
+            fmt.Println("Player joined with Name:", data.Name)
+        } else if commandType == "Move" {
+            var data playerInput
+
+            json.Unmarshal([]byte(string(command)), & data)
+
+            if data.Horizontal > 1 {
+                data.Horizontal = 1
+            }
+
+            if data.Horizontal < -1 {
+                data.Horizontal = -1
+            }
+
+            if data.Vertical > 1 {
+                data.Vertical = 1
+            }
+
+            if data.Vertical < -1 {
+                data.Vertical = -1
+            }
+
+            fmt.Printf("Horizontal: %f ", data.Horizontal)
+            fmt.Printf("Vertical: %f ", data.Vertical)
+            fmt.Printf("IsShooting: %t ", data.IsShooting)
+            fmt.Printf("MouseX: %f ", data.MousePositionX)
+            fmt.Printf("MouseY: %f ", data.MousePositionY)
+
+            //TODO: apply input (Calculate new position)
+            //TODO: send new position
+
+            dataJson, _:= json.Marshal(data)
+
+            messageResponse:= fmt.Sprintf("Move: %s", dataJson)
+
+            if err:= conn.WriteMessage(messageType, []byte(messageResponse));
+            err != nil {
+                log.Println(err)
+                return
+            }
+        } else {
+            fmt.Println("Unknown command type:", commandType)
+        }
+    }
 }
 
 
@@ -101,4 +109,11 @@ type playerInput struct {
     IsShooting bool `json:"isShooting"`
     MousePositionX float64 `json:mousePositionX`
     MousePositionY float64 `json:mousePositionY`
+}
+
+type player struct {
+    PositionX int
+    PositionY int
+    ID int
+    Name string
 }
