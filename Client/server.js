@@ -8,8 +8,8 @@ socket.onopen = function (e) {
     }
 
     const json = JSON.stringify(input);
-    console.log(json)
-    sendToServer(json)
+    console.log(json);
+    sendToServer(json);
 };
 
 socket.onmessage = function (event) {
