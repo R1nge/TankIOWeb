@@ -6,6 +6,7 @@ import (
     "net/http"
     "encoding/json"
     "strings"
+    "strconv"
 
     "github.com/gorilla/websocket"
 )
@@ -33,6 +34,23 @@ func main() {
     http.ListenAndServe(":8080", nil)
 }
 
+var players = make(map[int]player)
+
+
+func addPlayer (player player) {
+    fmt.Println("Adding player:", player)
+    i, _:= strconv.Atoi(player.ID)
+    players[i] = player
+}
+
+func removePlayer (id int) {
+    delete(players, id)
+}
+
+func getPlayer(id int) player {
+    return players[id]   
+}
+
 func listen(conn * websocket.Conn) {
     for {
         // read a message
@@ -54,13 +72,14 @@ func listen(conn * websocket.Conn) {
 
         if commandType == "Join" {
             var data player
-            json.Unmarshal([]byte(string(command)), & data)
+            json.Unmarshal([]byte(string(command)), &data)
             fmt.Println("Player joined with ID:", data.ID)
             fmt.Println("Player joined with Name:", data.Name)
+            addPlayer(data)
         } else if commandType == "Move" {
             var data playerInput
 
-            json.Unmarshal([]byte(string(command)), & data)
+            json.Unmarshal([]byte(string(command)), &data)
 
             if data.Horizontal > 1 {
                 data.Horizontal = 1
@@ -107,13 +126,13 @@ type playerInput struct {
     Horizontal float64 `json:"horizontal"`
     Vertical float64 `json:"vertical"`
     IsShooting bool `json:"isShooting"`
-    MousePositionX float64 `json:mousePositionX`
-    MousePositionY float64 `json:mousePositionY`
+    MousePositionX float64 `json:"mousePositionX"`
+    MousePositionY float64 `json:"mousePositionY"`
 }
 
 type player struct {
     PositionX int
     PositionY int
-    ID int
-    Name string
+    ID string `json:"id"`
+    Name string `json:"name"`
 }
