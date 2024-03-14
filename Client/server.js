@@ -1,18 +1,23 @@
 ﻿let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
 
-socket.onopen = function (e) {
-
-    const id = Math.floor(Math.random() * 1000)
-    const player = {
-        id: id.toString(), 
+const player = {
+        id: "0", //id.toString(), 
         name: "test",
         positionX: 0,
         positionY: 0
     }
+
+socket.onopen = function (e) {
+
+    const id = Math.floor(Math.random() * 1000)
     
     console.log(`Connected to server. Data sent: ${player}`);
     sendToServer(player, message_type.join);
 };
+
+export function getPlayerId() {
+    return 0
+} 
 
 
 let position = {
@@ -26,9 +31,10 @@ socket.onmessage = function (event) {
         //trim everything before the {
         const data = event.data.substring(event.data.indexOf("{"));
         const parsedData = JSON.parse(data);
-        position.positionX = parsedData.horizontal;
-        position.positionY = parsedData.vertical;
-        console.log(`Move message received: ${event.data}`);
+        console.log(data)
+        position.positionX = parsedData.positionX;
+        position.positionY = parsedData.positionY;
+        console.log(`Move message received: ${position.positionX} ${position.positionY}`);
     }
     
     console.log(`received a message: ${event.data}`);
@@ -39,7 +45,7 @@ export function getPosition() {
 } 
 
 export function sendToServer(dataStruct, messageType) {
-    const json = JSON.stringify(dataStruct);
+    const json = JSON.stringify(dataStruct)
     console.log(`Send to server json sent: ${json}`);
     socket.send(messageType + json);
 }

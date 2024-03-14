@@ -109,8 +109,12 @@ func listen(conn * websocket.Conn) {
 
             //TODO: apply input (Calculate new position)
             //TODO: send new position
+            
+            player := getPlayer(0)
+            player.PositionX += int(data.Horizontal)
+            player.PositionY -= int(data.Vertical)
 
-            dataJson, _:= json.Marshal(data)
+            dataJson, _:= json.Marshal(player)
 
             messageResponse:= fmt.Sprintf("Move: %s", dataJson)
 
@@ -135,8 +139,8 @@ type playerInput struct {
 }
 
 type player struct {
-    PositionX int
-    PositionY int
+    PositionX int `json:"positionX"`
+    PositionY int `json:"positionY"`
     ID string `json:"id"`
     Name string `json:"name"`
 }
