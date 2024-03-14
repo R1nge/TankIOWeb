@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
     "encoding/json"
 
 	"github.com/gorilla/websocket"
@@ -35,7 +34,7 @@ func listen(conn *websocket.Conn) {
 	for {
 		// read a message
 		messageType, messageContent, err := conn.ReadMessage()
-		timeReceive := time.Now()
+		
 		if err != nil {
 			log.Println(err)
 			return
@@ -69,9 +68,15 @@ func listen(conn *websocket.Conn) {
         fmt.Printf("IsShooting: %t ", data.IsShooting)
         fmt.Printf("MouseX: %f ", data.MousePositionX)
         fmt.Printf("MouseY: %f ", data.MousePositionY)
+        
+        //TODO: apply input (Calculate new position)
+        //TODO: send new position
 
 		// just echo the received message
-		messageResponse := fmt.Sprintf("Your message is: %s. Time received : %v", messageContent, timeReceive)
+		
+		dataJson, err := json.Marshal(data)
+		
+		messageResponse := fmt.Sprintf("Move: %s", dataJson)
 
 		if err := conn.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 			log.Println(err)

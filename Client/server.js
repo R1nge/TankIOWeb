@@ -12,6 +12,12 @@ socket.onopen = function (e) {
 };
 
 socket.onmessage = function (event) {
+    
+    if(event.data.startsWith("Move: ")) {
+        console.log(`${event.data}`);
+        return;
+    }
+    
     console.log(`received a message: ${event.data}`);
 }
 
