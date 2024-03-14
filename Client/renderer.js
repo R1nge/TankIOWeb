@@ -1,10 +1,13 @@
-﻿const canvas = document.getElementById("myCanvas");
+﻿import { sendToServer } from "./server.js";
+
+const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 const frameRate = 60;
+
+
 const deltaTime = 1 / frameRate;
-
-
 const bulletSpeed = 5;
+
 const bulletEntity = new BulletEntity(
     5,
     canvas.width / 2,
@@ -13,9 +16,17 @@ const bulletEntity = new BulletEntity(
 );
 
 window.addEventListener('keydown', function (event) {
+    
+    let data = {
+        horizontal: 69,
+        vertical: 1337
+    }
+    
+    
     const key = event.key;
     console.log("pressed: " + key);
     if (key === "w") {
+        sendToServer(data);
         bulletEntity.move(bulletSpeed, 0, 10, deltaTime);
     } else if (key === "a") {
         bulletEntity.move(bulletSpeed, -10, 0, deltaTime);
@@ -28,7 +39,7 @@ window.addEventListener('keydown', function (event) {
 
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    bulletEntity.draw();
+    bulletEntity.draw(ctx);
 }
 
 setInterval(render, deltaTime);

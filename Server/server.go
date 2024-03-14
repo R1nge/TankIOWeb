@@ -40,12 +40,14 @@ func listen(conn *websocket.Conn) {
 			log.Println(err)
 			return
 		}
-
-		// print out that message
-		fmt.Println(string(messageContent))
+		
+		fmt.Println("\n")
+		
+		fmt.Println("Received message:", string(messageContent))
 		
         var data playerInput
 		json.Unmarshal([]byte(string(messageContent)), &data)
+
         fmt.Printf("Horizontal: %f ", data.Horizontal)
         fmt.Printf("Vertical: %f ", data.Vertical)
         fmt.Printf("IsShooting: %t ", data.IsShooting)

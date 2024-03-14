@@ -1,21 +1,23 @@
 ﻿let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
 
 socket.onopen = function (e) {
-    
+
     const input = {
         horizontal: 69,
         vertical: 1337
     }
-
-    const json = JSON.stringify(input);
-    console.log(json);
-    sendToServer(json);
+    
+    console.log(`Connected to server. Data sent: ${input}`);
+    sendToServer(input);
 };
 
 socket.onmessage = function (event) {
-    console.log(event.data);
+    console.log(`received a message: ${event.data}`);
 }
 
-function sendToServer(data) {
-    socket.send(data);
+export function sendToServer(dataStruct) {
+    console.log(`Send to server data: ${dataStruct}`);
+    const json = JSON.stringify(dataStruct);
+    console.log(`Send to server json sent: ${json}`);
+    socket.send(json);
 }
