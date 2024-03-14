@@ -9,15 +9,25 @@ socket.onopen = function (e) {
     sendToServer(input, message_type.join);
 };
 
+
+let lastInput = {};
+
 socket.onmessage = function (event) {
     
     if(event.data.startsWith("Move")) {
+        //trim everything before the {
+        const data = event.data.substring(event.data.indexOf("{"));
+        const dataStruct = JSON.parse(data);
+        lastInput = dataStruct;
         console.log(`Move message received: ${event.data}`);
-        return;
     }
     
     console.log(`received a message: ${event.data}`);
 }
+
+export function getLastInput() {
+    return lastInput;
+} 
 
 export function sendToServer(dataStruct, messageType) {
     const json = JSON.stringify(dataStruct);
