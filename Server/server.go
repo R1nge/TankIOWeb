@@ -46,7 +46,11 @@ func listen(conn *websocket.Conn) {
 		
         var data playerInput
 		json.Unmarshal([]byte(string(messageContent)), &data)
-        fmt.Printf("Horizontal: %f", data.Horizontal)
+        fmt.Printf("Horizontal: %f ", data.Horizontal)
+        fmt.Printf("Vertical: %f ", data.Vertical)
+        fmt.Printf("IsShooting: %t ", data.IsShooting)
+        fmt.Printf("MouseX: %f ", data.MousePositionX)
+        fmt.Printf("MouseY: %f ", data.MousePositionY)
 
 		// just echo the received message
 		messageResponse := fmt.Sprintf("Your message is: %s. Time received : %v", messageContent, timeReceive)
