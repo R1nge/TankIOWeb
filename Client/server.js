@@ -32,6 +32,15 @@ socket.onmessage = function (event) {
     const data = event.data.substring(event.data.indexOf("{"));
     console.log(data);
     const parsedData = JSON.parse(data);
+    
+    if (event.data.startsWith(Constants.commands.join)) {
+        if(parsedData.id === getLocalId()) {
+            return;
+        }
+        console.log("Join message received: " + parsedData.id);
+        createPlayer(parsedData.id);
+        return;
+    }
 
     if (event.data.startsWith(Constants.commands.create)) {
         console.log(`Create message received: ${parsedData.id}`);

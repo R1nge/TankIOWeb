@@ -15,6 +15,5 @@ function renderPlayers() {
 
     for (const playerEntity of getPlayers().values()) {
         playerEntity.draw(ctx);
-        console.log("playerEntity: " + playerEntity.x + " " + playerEntity.y);
     }
 }

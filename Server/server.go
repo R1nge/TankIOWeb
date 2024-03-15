@@ -112,6 +112,15 @@ func join(command string, conn *websocket.Conn) {
 	fmt.Println("Player joined with ID:", data.ID)
 	fmt.Println("Player joined with Name:", data.Name)
 	addPlayer(data)
+	
+    dataJson, _ := json.Marshal(data)
+    
+    messageResponse := fmt.Sprintf("Join: %s", dataJson)
+    
+    if err := conn.WriteMessage(1, []byte(messageResponse)); err != nil {
+        log.Println(err)
+        return
+    }
 }
 
 func create(command string, messageType int, conn *websocket.Conn) {
