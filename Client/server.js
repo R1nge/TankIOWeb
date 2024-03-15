@@ -39,9 +39,9 @@ socket.onmessage = function (event) {
     }
 
     if (event.data.startsWith(Constants.commands.move)) {
+        moveCallback(parsedData);
         player.x = parsedData.x;
         player.y = parsedData.y;
-        moveCallback(parsedData);
         console.log(`Move message received: ${parsedData.id} ${parsedData.x} ${parsedData.y}`);
         return;
     }
