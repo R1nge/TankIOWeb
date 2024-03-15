@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
-	"strings"
 	"server/m/v2/utils"
-	"github.com/gorilla/websocket"
+	"strings"
 )
 
 func main() {
@@ -90,13 +90,17 @@ func listen(conn *websocket.Conn) {
 		command = "{" + command
 		fmt.Println("Command:", command)
 
-		if commandType == "Join" {
+		switch commandType {
+		case "Join":
 			join(command, conn)
-		} else if commandType == "Create" {
+			break
+		case "Create":
 			create(command, messageType, conn)
-		} else if commandType == "Move" {
+			break
+		case "Move":
 			move(command, messageType, conn)
-		} else {
+			break
+		default:
 			fmt.Println("Unknown command type:", commandType)
 		}
 	}
@@ -150,7 +154,7 @@ func move(command string, messageType int, conn *websocket.Conn) {
 		data.Vertical = -1
 	}
 
-    fmt.Printf("ID: %d ", data.ID)
+	fmt.Printf("ID: %d ", data.ID)
 	fmt.Printf("Horizontal: %f ", data.Horizontal)
 	fmt.Printf("Vertical: %f ", data.Vertical)
 	fmt.Printf("IsShooting: %t ", data.IsShooting)
@@ -163,7 +167,7 @@ func move(command string, messageType int, conn *websocket.Conn) {
 		fmt.Println("Player not found")
 		return
 	}
-	
+
 	player.Speed = 5
 
 	if player.PositionX+player.Speed*int(data.Horizontal) > boundary.MinX && player.PositionX+player.Speed*int(data.Horizontal) < boundary.MaxX {
