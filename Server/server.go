@@ -72,6 +72,9 @@ func getObject(id int) *object {
     return objects[id]
 }
 
+//Create boundaries struct
+var boundary = boundaries{10, 10, 790, 590}
+
 func listen(conn * websocket.Conn) {
     for {
         messageType, messageContent, err:= conn.ReadMessage()
@@ -164,17 +167,21 @@ func move(command string, messageType int, conn * websocket.Conn){
             if player == nil {
                 fmt.Println("Player not found")
                 return
-            }  
+            }   
             
-            player.PositionX += player.Speed * int(data.Horizontal)
-            player.PositionY -= player.Speed * int(data.Vertical)
+            if player.PositionX + player.Speed * int(data.Horizontal) > boundary.MinX && player.PositionX + player.Speed * int(data.Horizontal) < boundary.MaxX {
+                player.PositionX += player.Speed * int(data.Horizontal)              
+            }
+
+            if player.PositionY - player.Speed * int(data.Vertical) > boundary.MinY && player.PositionY - player.Speed * int(data.Vertical) < boundary.MaxY {
+                player.PositionY -= player.Speed * int(data.Vertical)
+            }
+            
             fmt.Println("Player position:", player.PositionX, player.PositionY)
 
             dataJson, _:= json.Marshal(player)
 
             messageResponse:= fmt.Sprintf("Move: %s", dataJson)
-            
-            fmt.Println("Sending message: %s", dataJson)
 
             if err:= conn.WriteMessage(messageType, []byte(messageResponse));
             err != nil {
@@ -204,4 +211,11 @@ type object struct {
     ID int `json:"id"`
     PositionX int `json:"x"`
     PositionY int `json:"y"`
+}
+
+type boundaries struct {
+    MinX int
+    MinY int
+    MaxX int
+    MaxY int
 }
