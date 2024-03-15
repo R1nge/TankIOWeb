@@ -165,8 +165,10 @@ func move(command string, messageType int, conn * websocket.Conn){
                 return
             }
             
-            player.PositionX += int(data.Horizontal)
-            player.PositionY -= int(data.Vertical)
+            player.Speed = 5
+            
+            player.PositionX += player.Speed * int(data.Horizontal)
+            player.PositionY -= player.Speed * int(data.Vertical)
             fmt.Println("Player position:", player.PositionX, player.PositionY)
 
             dataJson, _:= json.Marshal(player)
@@ -196,6 +198,7 @@ type player struct {
     PositionX int `json:"x"`
     PositionY int `json:"y"`
     Name string `json:"name"`
+    Speed int
 }
 
 type object struct {
