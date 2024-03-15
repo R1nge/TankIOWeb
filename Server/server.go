@@ -91,31 +91,48 @@ func listen(conn * websocket.Conn) {
         fmt.Println("Command:", command)
 
         if commandType == "Join" {
-            var data player
+           join(command, conn)
+        } else if commandType == "Create"{
+           create(command, messageType, conn)
+        } else if commandType == "Move" {
+           move(command, messageType, conn)
+        } else {
+            fmt.Println("Unknown command type:", commandType)
+        }
+    }
+}
+
+
+func join(command string, conn * websocket.Conn){
+ var data player
             json.Unmarshal([]byte(string(command)), &data)
             fmt.Println("Player joined with ID:", data.ID)
             fmt.Println("Player joined with Name:", data.Name)
             addPlayer(data)
-        } else if commandType == "Create"{
-            var data object
-            json.Unmarshal([]byte(string(command)), &data)
-            fmt.Println("Object created with ID:", data.ID)
-            fmt.Println("Object created with Position:", data.PositionX, data.PositionY)
-            addObject(data)
-            
-            dataJson, _:= json.Marshal(data)
-            
-            messageResponse:= fmt.Sprintf("Create: %s", dataJson)
-                        
-            fmt.Println("Sending message: %s", dataJson)
-            
-            if err:= conn.WriteMessage(messageType, []byte(messageResponse));
-            err != nil {
-                log.Println(err)
-                return
-            }
-        } else if commandType == "Move" {
-            var data playerInput
+}
+
+func create(command string, messageType int, conn * websocket.Conn){
+     var data object
+                json.Unmarshal([]byte(string(command)), &data)
+                fmt.Println("Object created with ID:", data.ID)
+                fmt.Println("Object created with Position:", data.PositionX, data.PositionY)
+                addObject(data)
+                
+                dataJson, _:= json.Marshal(data)
+                
+                messageResponse:= fmt.Sprintf("Create: %s", dataJson)
+                            
+                fmt.Println("Sending message: %s", dataJson)
+                
+                if err:= conn.WriteMessage(messageType, []byte(messageResponse));
+                err != nil {
+                    log.Println(err)
+                    return
+                }
+}
+
+func move(command string, messageType int, conn * websocket.Conn){
+ var data playerInput
 
             json.Unmarshal([]byte(string(command)), &data)
 
@@ -163,10 +180,6 @@ func listen(conn * websocket.Conn) {
                 log.Println(err)
                 return
             }
-        } else {
-            fmt.Println("Unknown command type:", commandType)
-        }
-    }
 }
 
 

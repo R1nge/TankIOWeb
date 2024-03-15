@@ -2,11 +2,6 @@
 
 let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
 
-function Range(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
-}
-
-const id = Range(1,1000);
 const player = createPlayer(0);
 
 socket.onopen = function (e) {

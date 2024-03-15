@@ -50,7 +50,6 @@ window.addEventListener('keydown', function (event) {
 
 function gameLoop() {
     render(Constants.deltaTime);
-    //ctx.translate(ctx.canvas.width / 2 - playerEntity.x, ctx.canvas.height / 2 - playerEntity.y);
 
     if (playerEntities.size === 0) {
         return;
@@ -63,7 +62,6 @@ function gameLoop() {
         }
         console.log("playerEntity: " + playerEntity.x + " " + playerEntity.y);
         playerEntity.draw(ctx);
-        //playerEntity.moveTo(playerEntity.x, playerEntity.y, Constants.deltaTime);
     }
 }
 
