@@ -1,6 +1,7 @@
 ﻿package structs
 
 type PlayerInput struct {
+    ID int `json:"id"`
     Horizontal float64 `json:"horizontal"`
     Vertical float64 `json:"vertical"`
     IsShooting bool `json:"isShooting"`

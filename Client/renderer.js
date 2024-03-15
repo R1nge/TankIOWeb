@@ -13,12 +13,8 @@ function renderPlayers() {
         return;
     }
 
-    for (let i = 0; i < getPlayers().size; i++) {
-        const playerEntity = getPlayers().get(i);
-        if (playerEntity === undefined) {
-            continue;
-        }
-        console.log("playerEntity: " + playerEntity.x + " " + playerEntity.y);
+    for (const playerEntity of getPlayers().values()) {
         playerEntity.draw(ctx);
+        console.log("playerEntity: " + playerEntity.x + " " + playerEntity.y);
     }
 }

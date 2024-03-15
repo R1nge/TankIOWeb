@@ -1,18 +1,27 @@
 ﻿import {createPlayer, moveCallback} from "./engine.js";
+import {Utils} from "./utils.js";
 
 let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
 
-const player = createPlayer(0);
+const id = Utils.randomInt(0, 1000);
+    
+export function getLocalId(){
+    return id;
+}
+
+const player = createPlayer(getLocalId());
 
 socket.onopen = function (e) {
     console.log(`Connected to server. Data sent: ${player}`);
     
     const loginData = {
-        id: 0,
+        id: getLocalId(),
         x: player.x,
         y: player.y,
         name: "R1nge"
     }
+
+    console.log(`Login data sent: ${loginData.id} ${loginData.x} ${loginData.y} ${loginData.name}`);
     
     sendToServer(loginData, message_type.join);
 };
@@ -32,7 +41,7 @@ socket.onmessage = function (event) {
         player.x = parsedData.x;
         player.y = parsedData.y;
         moveCallback(parsedData);
-        console.log(`Move message received: ${parsedData.x} ${parsedData.y}`);
+        console.log(`Move message received: ${parsedData.id} ${parsedData.x} ${parsedData.y}`);
         return;
     }
 

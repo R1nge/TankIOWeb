@@ -6,9 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
-
 	"server/m/v2/utils"
-
 	"github.com/gorilla/websocket"
 )
 
@@ -152,19 +150,21 @@ func move(command string, messageType int, conn *websocket.Conn) {
 		data.Vertical = -1
 	}
 
+    fmt.Printf("ID: %d ", data.ID)
 	fmt.Printf("Horizontal: %f ", data.Horizontal)
 	fmt.Printf("Vertical: %f ", data.Vertical)
 	fmt.Printf("IsShooting: %t ", data.IsShooting)
 	fmt.Printf("MouseX: %f ", data.MousePositionX)
 	fmt.Printf("MouseY: %f ", data.MousePositionY)
 
-	player := getPlayer(0)
-	player.Speed = 5
+	player := getPlayer(data.ID)
 
 	if player == nil {
 		fmt.Println("Player not found")
 		return
 	}
+	
+	player.Speed = 5
 
 	if player.PositionX+player.Speed*int(data.Horizontal) > boundary.MinX && player.PositionX+player.Speed*int(data.Horizontal) < boundary.MaxX {
 		player.PositionX += player.Speed * int(data.Horizontal)

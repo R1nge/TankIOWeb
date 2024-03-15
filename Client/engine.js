@@ -1,5 +1,5 @@
 ﻿import {Constants} from "./constants.js";
-import {sendToServer} from "./server.js";
+import {getLocalId, sendToServer} from "./server.js";
 import {PlayerEntity} from "./playerEntity.js";
 import {ctx, render} from "./renderer.js";
 
@@ -10,7 +10,7 @@ export function getPlayers() {
 }
 
 export function createPlayer(id) {
-    const playerEntity = new PlayerEntity(10, 10, ctx.canvas.width / 2, ctx.canvas.height / 2, "red");
+    const playerEntity = new PlayerEntity(id, 10, ctx.canvas.width / 2, ctx.canvas.height / 2, "red");
     console.log("create player " + id);
     playerEntities.set(id, playerEntity);
     return playerEntity;
@@ -27,7 +27,7 @@ export function moveCallback(data) {
 window.addEventListener('keydown', function (event) {
 
     let data = {
-        id: 0,
+        id: getLocalId(),
         horizontal: 0,
         vertical: 0,
         isShooting: false,
