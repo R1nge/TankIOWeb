@@ -159,13 +159,12 @@ func move(command string, messageType int, conn * websocket.Conn){
             fmt.Printf("MouseY: %f ", data.MousePositionY)
             
             player := getPlayer(0)
+            player.Speed = 5
             
             if player == nil {
                 fmt.Println("Player not found")
                 return
-            }
-            
-            player.Speed = 5
+            }  
             
             player.PositionX += player.Speed * int(data.Horizontal)
             player.PositionY -= player.Speed * int(data.Vertical)
