@@ -16,40 +16,31 @@ export function createPlayer(id) {
     return playerEntity;
 }
 
+export function joinCallback(data) {
+    
+}
+
 export function moveCallback(data) {
-    console.log("moveCallback called");
-    console.log(data.id)
     const playerEntity = playerEntities.get(data.id);
-    console.log("moveCallback: " + playerEntity.x + " " + playerEntity.y);
-    console.log("moveCallback: " + data.x + " " + data.y);
 
     //Move right
     if (playerEntity.x < data.x) {
-
         playerEntity.rotate(0);
-        //Look right
-        console.log("rotate 0");
     }
 
     //Move left
     if (playerEntity.x > data.x) {
         playerEntity.rotate(Math.PI);
-        //Look left
-        console.log("rotate 180");
     }
 
     //Move Down
     if (playerEntity.y < data.y) {
         playerEntity.rotate(Math.PI / 2);
-        //Look down
-        console.log("rotate 90");
     }
 
     //Move Up
     if (playerEntity.y > data.y) {
         playerEntity.rotate(-Math.PI / 2);
-        //Look up
-        console.log("rotate -90");
     }
 }
 

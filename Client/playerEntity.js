@@ -8,17 +8,13 @@
         this.rotationAngle = rotationAngle;
     }
 
-    //Write a function to rotate the image by degree in radians in the y axis
-
     draw(ctx) {
-
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotationAngle);
         ctx.drawImage(this.image, -this.image.width / 2, -this.image.height / 2, this.image.width, this.image.height);
         ctx.restore();
     }
-
 
     rotate(angle) {
         this.rotationAngle = angle

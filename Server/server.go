@@ -113,7 +113,7 @@ func join(command string, conn *websocket.Conn) {
 	fmt.Println("Player joined with Name:", data.Name)
 	addPlayer(data)
 	
-    dataJson, _ := json.Marshal(data)
+    dataJson, _ := json.Marshal(players)
     
     messageResponse := fmt.Sprintf("Join: %s", dataJson)
     

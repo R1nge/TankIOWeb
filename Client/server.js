@@ -1,4 +1,4 @@
-﻿import {createPlayer, moveCallback} from "./engine.js";
+﻿import {createPlayer, getPlayers, moveCallback} from "./engine.js";
 import {Utils} from "./utils.js";
 import {Constants} from "./constants.js";
 
@@ -10,15 +10,15 @@ export function getLocalId(){
     return id;
 }
 
-const player = createPlayer(getLocalId());
+const localPlayer = createPlayer(getLocalId());
 
 socket.onopen = function (e) {
-    console.log(`Connected to server. Data sent: ${player}`);
+    console.log(`Connected to server. Data sent: ${localPlayer}`);
     
     const loginData = {
         id: getLocalId(),
-        x: player.x,
-        y: player.y,
+        x: localPlayer.x,
+        y: localPlayer.y,
         name: "R1nge"
     }
 
@@ -35,6 +35,7 @@ socket.onmessage = function (event) {
     
     if (event.data.startsWith(Constants.commands.join)) {
         if(parsedData.id === getLocalId()) {
+            console.log("Already joined");
             return;
         }
         console.log("Join message received: " + parsedData.id);
@@ -49,8 +50,8 @@ socket.onmessage = function (event) {
 
     if (event.data.startsWith(Constants.commands.move)) {
         moveCallback(parsedData);
-        player.x = parsedData.x;
-        player.y = parsedData.y;
+        getPlayers().get(parsedData.id).x = parsedData.x;
+        getPlayers().get(parsedData.id).y = parsedData.y;
         console.log(`Move message received: ${parsedData.id} ${parsedData.x} ${parsedData.y}`);
         return;
     }
