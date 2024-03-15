@@ -55,6 +55,26 @@ func getPlayer(id int) *player {
     return players[id]   
 }
 
+var objects = make(map[int]*object)
+
+func addObject (object object) {
+    fmt.Println("Adding object:", object)
+    i, _:= strconv.Atoi(object.ID)
+    objects[i] = &object
+    
+    for k, v := range objects {
+        fmt.Println(k, v)
+    }
+}
+
+func removeObject (id int) {
+    delete(objects, id)
+}
+
+func getObject(id int) *object {
+    return objects[id]
+}
+
 func listen(conn * websocket.Conn) {
     for {
         messageType, messageContent, err:= conn.ReadMessage()
@@ -79,6 +99,26 @@ func listen(conn * websocket.Conn) {
             fmt.Println("Player joined with ID:", data.ID)
             fmt.Println("Player joined with Name:", data.Name)
             addPlayer(data)
+        } else if commandType == "Create"{
+            var data object
+            json.Unmarshal([]byte(string(command)), &data)
+            fmt.Println("Object created with ID:", data.ID)
+            fmt.Println("Object created with Position:", data.PositionX, data.PositionY)
+            addObject(data)
+            
+            dataJson, _:= json.Marshal(data)
+            
+                        messageResponse:= fmt.Sprintf("Create: %s", dataJson)
+                        
+                        fmt.Println("Sending message: %s", dataJson)
+            
+                        if err:= conn.WriteMessage(messageType, []byte(messageResponse));
+                        err != nil {
+                            log.Println(err)
+                            return
+                        }
+            
+            
         } else if commandType == "Move" {
             var data playerInput
 
@@ -144,8 +184,14 @@ type playerInput struct {
 }
 
 type player struct {
+    ID string `json:"id"`
     PositionX int `json:"positionX"`
     PositionY int `json:"positionY"`
-    ID string `json:"id"`
     Name string `json:"name"`
+}
+
+type object struct {
+    ID string `json:"id"`
+    PositionX int `json:"positionX"`
+    PositionY int `json:"positionY"`
 }
