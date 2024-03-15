@@ -6,6 +6,8 @@ import (
     "net/http"
     "encoding/json"
     "strings"
+    
+    "server/m/v2/utils"
 
     "github.com/gorilla/websocket"
 )
@@ -32,10 +34,10 @@ func main() {
     http.ListenAndServe(":8080", nil)
 }
 
-var players = make(map[int]*player)
+var players = make(map[int]*structs.Player)
 
 
-func addPlayer (player player) {
+func addPlayer (player structs.Player) {
     fmt.Println("Adding player:", player)
     players[player.ID] = &player
     
@@ -49,13 +51,13 @@ func removePlayer (id int) {
     delete(players, id)
 }
 
-func getPlayer(id int) *player {
+func getPlayer(id int) *structs.Player {
     return players[id]   
 }
 
-var objects = make(map[int]*object)
+var objects = make(map[int]*structs.Object)
 
-func addObject (object object) {
+func addObject (object structs.Object) {
     fmt.Println("Adding object:", object)
     objects[object.ID] = &object
     
@@ -68,12 +70,11 @@ func removeObject (id int) {
     delete(objects, id)
 }
 
-func getObject(id int) *object {
+func getObject(id int) *structs.Object {
     return objects[id]
 }
 
-//Create boundaries struct
-var boundary = boundaries{10, 10, 790, 590}
+var boundary = structs.Boundaries{10, 10, 790, 590}
 
 func listen(conn * websocket.Conn) {
     for {
@@ -107,7 +108,7 @@ func listen(conn * websocket.Conn) {
 
 
 func join(command string, conn * websocket.Conn){
- var data player
+ var data structs.Player
             json.Unmarshal([]byte(string(command)), &data)
             fmt.Println("Player joined with ID:", data.ID)
             fmt.Println("Player joined with Name:", data.Name)
@@ -115,7 +116,7 @@ func join(command string, conn * websocket.Conn){
 }
 
 func create(command string, messageType int, conn * websocket.Conn){
-     var data object
+     var data structs.Object
                 json.Unmarshal([]byte(string(command)), &data)
                 fmt.Println("Object created with ID:", data.ID)
                 fmt.Println("Object created with Position:", data.PositionX, data.PositionY)
@@ -135,7 +136,7 @@ func create(command string, messageType int, conn * websocket.Conn){
 }
 
 func move(command string, messageType int, conn * websocket.Conn){
- var data playerInput
+ var data structs.PlayerInput
 
             json.Unmarshal([]byte(string(command)), &data)
 
@@ -188,34 +189,4 @@ func move(command string, messageType int, conn * websocket.Conn){
                 log.Println(err)
                 return
             }
-}
-
-
-type playerInput struct {
-    Horizontal float64 `json:"horizontal"`
-    Vertical float64 `json:"vertical"`
-    IsShooting bool `json:"isShooting"`
-    MousePositionX float64 `json:"mousePositionX"`
-    MousePositionY float64 `json:"mousePositionY"`
-}
-
-type player struct {
-    ID int `json:"id"`
-    PositionX int `json:"x"`
-    PositionY int `json:"y"`
-    Name string `json:"name"`
-    Speed int
-}
-
-type object struct {
-    ID int `json:"id"`
-    PositionX int `json:"x"`
-    PositionY int `json:"y"`
-}
-
-type boundaries struct {
-    MinX int
-    MinY int
-    MaxX int
-    MaxY int
 }
