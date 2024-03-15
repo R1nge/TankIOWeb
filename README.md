@@ -26,3 +26,6 @@ Have a json db
 - Possibly network heavy
 
 
+Rendering
+https://developer.ibm.com/tutorials/wa-canvashtml5layering/
+https://web.dev/articles/canvas-performance

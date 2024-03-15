@@ -1,4 +1,7 @@
-﻿export class PlayerEntity {
+﻿import {Utils} from "./utils.js";
+import {Constants} from "./constants.js";
+
+export class PlayerEntity {
     constructor(id, radius, x, y, color) {
         this.id = id;
         this.radius = radius;
@@ -15,8 +18,8 @@
         ctx.closePath();
     }
 
-    moveTo(directionX, directionY) {
-        this.x = directionX;
-        this.y = directionY;
+    moveTo(positionX, positionY) {
+        this.x = Utils.lerp(this.x, positionX, Constants.deltaTime);
+        this.y = Utils.lerp(this.y, positionY, Constants.deltaTime);
     }
 }
