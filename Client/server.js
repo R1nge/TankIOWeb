@@ -1,4 +1,4 @@
-﻿import {createCallback} from "./engine.js";
+﻿import {createCallback, moveCallback} from "./engine.js";
 
 let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
 
@@ -34,6 +34,7 @@ socket.onmessage = function (event) {
     if (event.data.startsWith("Move")) {
         player.positionX = parsedData.positionX;
         player.positionY = parsedData.positionY;
+        moveCallback(parsedData);
         console.log(`Move message received: ${player.positionX} ${player.positionY}`);
         return;
     }

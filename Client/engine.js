@@ -2,21 +2,25 @@
 import {sendToServer} from "./server.js";
 import {PlayerEntity} from "./playerEntity.js";
 import {ctx, render} from "./renderer.js";
-import {getPosition} from "./server.js"; 
+import {getPosition} from "./server.js";
 
-const playerEntity = new PlayerEntity(10, ctx.canvas.width / 2, ctx.canvas.height / 2, "red", 250);
+const playerEntities = new Map();
 
-export function createCallback(data){
+export function createCallback(data) {
     console.log("createCallback called");
-    
-    if (data.id === "0"){
-        console.log("Player spawned");
-        playerEntity.x = data.positionX;
-        playerEntity.y = data.positionY;
-        //playerEntity.color = data.color;
-        //playerEntity.radius = data.radius;
-        //playerEntity.mass = data.mass;
-    }
+    const playerEntity = new PlayerEntity(10, ctx.canvas.width / 2, ctx.canvas.height / 2, "red", 250);
+    playerEntity.x = data.positionX;
+    playerEntity.y = data.positionY;
+    console.log(playerEntity);
+    playerEntities.set(Number(data.id), playerEntity);
+    console.log("Player spawned");
+}
+
+export function moveCallback(data) {
+    console.log("moveCallback called");
+    const playerEntity = playerEntities.get(Number(data.id));
+    console.log("moveCallback: " + data.positionX + " " + data.positionY);
+    playerEntity.moveTo(data.positionX, data.positionY)
 }
 
 
@@ -47,19 +51,23 @@ window.addEventListener('keydown', function (event) {
         sendToServer(data, "Move");
     }
 });
-const playerEntity2 = new PlayerEntity(10, ctx.canvas.width / 2 + 1, ctx.canvas.height / 2 + 1, "blue", 250);
 
 function gameLoop() {
     render(Constants.deltaTime);
     //ctx.translate(ctx.canvas.width / 2 - playerEntity.x, ctx.canvas.height / 2 - playerEntity.y);
-    playerEntity.draw(ctx);
-    playerEntity2.draw(ctx);
-
-    if (getPosition() === undefined || getPosition() === null || getPosition().positionX === 0 && getPosition().positionY === 0 || getPosition().positionX === undefined || getPosition().positionY === undefined) {
+    
+    if (playerEntities.size === 0) {
         return;
     }
-
-    playerEntity.moveTo(getPosition().positionX, getPosition().positionY, Constants.deltaTime);
+    
+    for (let i = 0; i < playerEntities.size; i++) {
+        const playerEntity = playerEntities.get(i);
+        if (playerEntity === undefined) {
+            continue;
+        }
+        playerEntity.draw(ctx);
+        playerEntity.moveTo(getPosition().positionX, getPosition().positionY, Constants.deltaTime);
+    }
 }
 
 setInterval(gameLoop, Constants.deltaTime);
