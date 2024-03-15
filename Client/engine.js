@@ -39,16 +39,16 @@ window.addEventListener('keydown', function (event) {
     console.log("pressed: " + key);
     if (key === "w") {
         data.vertical = 1;
-        sendToServer(data, "Move");
+        sendToServer(data, Constants.commands.move);
     } else if (key === "a") {
         data.horizontal = -1;
-        sendToServer(data, "Move");
+        sendToServer(data, Constants.commands.move);
     } else if (key === "s") {
         data.vertical = -1;
-        sendToServer(data, "Move");
+        sendToServer(data, Constants.commands.move);
     } else if (key === "d") {
         data.horizontal = 1;
-        sendToServer(data, "Move");
+        sendToServer(data, Constants.commands.move);
     }
 });
 

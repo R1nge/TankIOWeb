@@ -1,5 +1,6 @@
 ﻿import {createPlayer, moveCallback} from "./engine.js";
 import {Utils} from "./utils.js";
+import {Constants} from "./constants.js";
 
 let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
 
@@ -23,7 +24,7 @@ socket.onopen = function (e) {
 
     console.log(`Login data sent: ${loginData.id} ${loginData.x} ${loginData.y} ${loginData.name}`);
     
-    sendToServer(loginData, message_type.join);
+    sendToServer(loginData, Constants.commands.join);
 };
 
 socket.onmessage = function (event) {
@@ -32,12 +33,12 @@ socket.onmessage = function (event) {
     console.log(data);
     const parsedData = JSON.parse(data);
 
-    if (event.data.startsWith("Create")) {
+    if (event.data.startsWith(Constants.commands.create)) {
         console.log(`Create message received: ${parsedData.id}`);
         return;
     }
 
-    if (event.data.startsWith("Move")) {
+    if (event.data.startsWith(Constants.commands.move)) {
         player.x = parsedData.x;
         player.y = parsedData.y;
         moveCallback(parsedData);
@@ -52,11 +53,4 @@ export function sendToServer(dataStruct, messageType) {
     const json = JSON.stringify(dataStruct)
     console.log(`Send to server json sent: ${json}`);
     socket.send(messageType + json);
-}
-
-const message_type = {
-    join: "Join",
-    create: "Create",
-    move: "Move",
-    leave: "Leave"
 }
