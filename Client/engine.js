@@ -5,6 +5,10 @@ import {ctx, render} from "./renderer.js";
 
 const playerEntities = new Map();
 
+export function getPlayers() {
+    return playerEntities;
+}
+
 export function createPlayer(id) {
     const playerEntity = new PlayerEntity(10, 10, ctx.canvas.width / 2, ctx.canvas.height / 2, "red");
     console.log("create player " + id);
@@ -50,19 +54,6 @@ window.addEventListener('keydown', function (event) {
 
 function gameLoop() {
     render(Constants.deltaTime);
-
-    if (playerEntities.size === 0) {
-        return;
-    }
-
-    for (let i = 0; i < playerEntities.size; i++) {
-        const playerEntity = playerEntities.get(i);
-        if (playerEntity === undefined) {
-            continue;
-        }
-        console.log("playerEntity: " + playerEntity.x + " " + playerEntity.y);
-        playerEntity.draw(ctx);
-    }
 }
 
 setInterval(gameLoop, Constants.deltaTime);
