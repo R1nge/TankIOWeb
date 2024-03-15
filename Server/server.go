@@ -6,7 +6,6 @@ import (
     "net/http"
     "encoding/json"
     "strings"
-    "strconv"
 
     "github.com/gorilla/websocket"
 )
@@ -38,8 +37,7 @@ var players = make(map[int]*player)
 
 func addPlayer (player player) {
     fmt.Println("Adding player:", player)
-    i, _:= strconv.Atoi(player.ID)
-    players[i] = &player
+    players[player.ID] = &player
     
     
     for k, v := range players {
@@ -59,8 +57,7 @@ var objects = make(map[int]*object)
 
 func addObject (object object) {
     fmt.Println("Adding object:", object)
-    i, _:= strconv.Atoi(object.ID)
-    objects[i] = &object
+    objects[object.ID] = &object
     
     for k, v := range objects {
         fmt.Println(k, v)
@@ -108,17 +105,15 @@ func listen(conn * websocket.Conn) {
             
             dataJson, _:= json.Marshal(data)
             
-                        messageResponse:= fmt.Sprintf("Create: %s", dataJson)
+            messageResponse:= fmt.Sprintf("Create: %s", dataJson)
                         
-                        fmt.Println("Sending message: %s", dataJson)
+            fmt.Println("Sending message: %s", dataJson)
             
-                        if err:= conn.WriteMessage(messageType, []byte(messageResponse));
-                        err != nil {
-                            log.Println(err)
-                            return
-                        }
-            
-            
+            if err:= conn.WriteMessage(messageType, []byte(messageResponse));
+            err != nil {
+                log.Println(err)
+                return
+            }
         } else if commandType == "Move" {
             var data playerInput
 
@@ -184,14 +179,14 @@ type playerInput struct {
 }
 
 type player struct {
-    ID string `json:"id"`
-    PositionX int `json:"positionX"`
-    PositionY int `json:"positionY"`
+    ID int `json:"id"`
+    PositionX int `json:"x"`
+    PositionY int `json:"y"`
     Name string `json:"name"`
 }
 
 type object struct {
-    ID string `json:"id"`
-    PositionX int `json:"positionX"`
-    PositionY int `json:"positionY"`
+    ID int `json:"id"`
+    PositionX int `json:"x"`
+    PositionY int `json:"y"`
 }

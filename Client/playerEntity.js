@@ -1,10 +1,10 @@
 ﻿export class PlayerEntity {
-    constructor(radius, x, y, color, speed) {
+    constructor(id, radius, x, y, color) {
+        this.id = id;
         this.radius = radius;
         this.x = x;
         this.y = y;
         this.color = color;
-        this.speed = speed;
     }
 
     draw(ctx) {
@@ -15,8 +15,8 @@
         ctx.closePath();
     }
 
-    moveTo(directionX, directionY, deltaTime) {
-        this.x = this.speed * directionX * deltaTime;
-        this.y = this.speed * directionY * deltaTime;
+    moveTo(directionX, directionY) {
+        this.x = directionX;
+        this.y = directionY;
     }
 }

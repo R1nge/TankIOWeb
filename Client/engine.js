@@ -2,27 +2,23 @@
 import {sendToServer} from "./server.js";
 import {PlayerEntity} from "./playerEntity.js";
 import {ctx, render} from "./renderer.js";
-import {getPosition} from "./server.js";
 
 const playerEntities = new Map();
 
-export function createCallback(data) {
-    console.log("createCallback called");
-    const playerEntity = new PlayerEntity(10, ctx.canvas.width / 2, ctx.canvas.height / 2, "red", 250);
-    playerEntity.x = data.positionX;
-    playerEntity.y = data.positionY;
-    console.log(playerEntity);
-    playerEntities.set(Number(data.id), playerEntity);
-    console.log("Player spawned");
+export function createPlayer(id) {
+    const playerEntity = new PlayerEntity(10, 10, ctx.canvas.width / 2, ctx.canvas.height / 2, "red");
+    console.log("create player " + id);
+    playerEntities.set(id, playerEntity);
+    return playerEntity;
 }
 
 export function moveCallback(data) {
     console.log("moveCallback called");
-    const playerEntity = playerEntities.get(Number(data.id));
-    console.log("moveCallback: " + data.positionX + " " + data.positionY);
-    playerEntity.moveTo(data.positionX, data.positionY)
+    console.log(data.id)
+    const playerEntity = playerEntities.get(data.id);
+    console.log("moveCallback: " + data.x + " " + data.y);
+    playerEntity.moveTo(data.x, data.y);
 }
-
 
 window.addEventListener('keydown', function (event) {
 
@@ -55,18 +51,19 @@ window.addEventListener('keydown', function (event) {
 function gameLoop() {
     render(Constants.deltaTime);
     //ctx.translate(ctx.canvas.width / 2 - playerEntity.x, ctx.canvas.height / 2 - playerEntity.y);
-    
+
     if (playerEntities.size === 0) {
         return;
     }
-    
+
     for (let i = 0; i < playerEntities.size; i++) {
         const playerEntity = playerEntities.get(i);
         if (playerEntity === undefined) {
             continue;
         }
+        console.log("playerEntity: " + playerEntity.x + " " + playerEntity.y);
         playerEntity.draw(ctx);
-        playerEntity.moveTo(getPosition().positionX, getPosition().positionY, Constants.deltaTime);
+        //playerEntity.moveTo(playerEntity.x, playerEntity.y, Constants.deltaTime);
     }
 }
 

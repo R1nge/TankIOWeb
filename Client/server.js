@@ -1,22 +1,25 @@
-﻿import {createCallback, moveCallback} from "./engine.js";
+﻿import {createPlayer, moveCallback} from "./engine.js";
 
 let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
 
-const player = {
-    id: "0", //id.toString(), 
-    name: "test",
-    positionX: 0,
-    positionY: 0
+function Range(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
 }
 
-export function getPosition() {
-    return player;
-}
+const id = Range(1,1000);
+const player = createPlayer(0);
 
 socket.onopen = function (e) {
     console.log(`Connected to server. Data sent: ${player}`);
-    sendToServer(player, message_type.join);
-    sendToServer(player, message_type.create);
+    
+    const loginData = {
+        id: 0,
+        x: player.x,
+        y: player.y,
+        name: "R1nge"
+    }
+    
+    sendToServer(loginData, message_type.join);
 };
 
 socket.onmessage = function (event) {
@@ -26,16 +29,15 @@ socket.onmessage = function (event) {
     const parsedData = JSON.parse(data);
 
     if (event.data.startsWith("Create")) {
-        console.log(`Create message received: ${parsedData.positionX} ${parsedData.positionY}`);
-        createCallback(parsedData);
+        console.log(`Create message received: ${parsedData.id}`);
         return;
     }
 
     if (event.data.startsWith("Move")) {
-        player.positionX = parsedData.positionX;
-        player.positionY = parsedData.positionY;
+        player.x = parsedData.x;
+        player.y = parsedData.y;
         moveCallback(parsedData);
-        console.log(`Move message received: ${player.positionX} ${player.positionY}`);
+        console.log(`Move message received: ${parsedData.x} ${parsedData.y}`);
         return;
     }
 
