@@ -26,6 +26,15 @@ Have a json db
 - Possibly network heavy
 
 
+TODO:
+Use connection id from a socket connection
+Tiled app
+Server tickrate
+Store the input and execute each tick
+Send data of each player down at the end of each tick
+Disconnect client
+
+
 Rendering
 https://developer.ibm.com/tutorials/wa-canvashtml5layering/
 https://web.dev/articles/canvas-performance
