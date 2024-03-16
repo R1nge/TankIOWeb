@@ -1,12 +1,12 @@
-﻿import {createPlayer, getPlayers, moveCallback} from "./engine.js";
+﻿import {createPlayer, getPlayerEntities, moveCallback, removePlayer} from "./engine.js";
 import {Utils} from "./utils.js";
 import {Constants} from "./constants.js";
 
 let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
 
 const id = Utils.randomInt(0, 1000);
-    
-export function getLocalId(){
+
+export function getLocalId() {
     return id;
 }
 
@@ -14,7 +14,7 @@ const localPlayer = createPlayer(getLocalId());
 
 socket.onopen = function (e) {
     console.log(`Connected to server. Data sent: ${localPlayer}`);
-    
+
     const loginData = {
         id: getLocalId(),
         x: localPlayer.x,
@@ -23,7 +23,7 @@ socket.onopen = function (e) {
     }
 
     console.log(`Login data sent: ${loginData.id} ${loginData.x} ${loginData.y} ${loginData.name}`);
-    
+
     sendToServer(loginData, Constants.commands.join);
 };
 
@@ -32,9 +32,9 @@ socket.onmessage = function (event) {
     const data = event.data.substring(event.data.indexOf("{"));
     console.log(`Message received: ${data}`);
     const parsedData = JSON.parse(data);
-    
+
     if (event.data.startsWith(Constants.commands.join)) {
-        if(parsedData.id === getLocalId()) {
+        if (parsedData.id === getLocalId()) {
             console.log("Already joined");
             return;
         }
@@ -49,7 +49,7 @@ socket.onmessage = function (event) {
     }
 
     if (event.data.startsWith(Constants.commands.move)) {
-        const player = getPlayers().get(parsedData.id);
+        const player = getPlayerEntities().get(parsedData.id);
         if (!player) {
             console.log(`Player ${parsedData.id} not found`);
             return;
@@ -60,7 +60,7 @@ socket.onmessage = function (event) {
         console.log(`Move message received: ${parsedData.id} ${parsedData.x} ${parsedData.y}`);
         return;
     }
-    
+
     if (event.data.startsWith(Constants.commands.sync)) {
         console.log(`Sync message received: ${parsedData}`);
 
@@ -70,24 +70,22 @@ socket.onmessage = function (event) {
         createPlayer(parsedData.id);
 
 
-        const player = getPlayers().get(parsedData.id);
+        const player = getPlayerEntities().get(parsedData.id);
         if (!player) {
             console.log(`Player ${parsedData.id} not found`);
             return;
 
         }
+        
         player.x = parsedData.x;
-        
         player.y = parsedData.y;
-        
-        // for (const player of getPlayers().values()) {
-        //     sendToServer({
-        //         id: player.id,
-        //         x: player.x,
-        //         y: player.y
-        //     }, Constants.commands.sync);
-        // }
-        
+
+        return;
+    }
+    
+    if (event.data.startsWith(Constants.commands.leave)) {
+        console.log(`Leave message received: ${parsedData.id}`);
+        removePlayer(parsedData.id);
         return;
     }
 

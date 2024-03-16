@@ -14,19 +14,8 @@ var tickrate = 60
 var connections = make(map[*websocket.Conn]bool)
 var broadcast = make(chan []byte)
 
-func handleConnections() {
-    for {
-        conn := <-broadcast
-        for client := range connections {
-            err := client.WriteMessage(1, conn)
-            if err != nil {
-                fmt.Println(err)
-                client.Close()
-                delete(connections, client)
-            }
-        }
-    }
-}
+//TODO:
+//Go routines and channels for syncing
 
 func main() {
 	var upgrader = websocket.Upgrader{
@@ -62,6 +51,11 @@ func addPlayer(player structs.Player) {
 }
 
 func removePlayer(id int) {
+    if players[id] == nil {
+        fmt.Println("Player not found:", id)
+        return
+    }
+    fmt.Println("Removing player:", id)
 	delete(players, id)
 }
 
@@ -88,7 +82,7 @@ func getObject(id int) *structs.Object {
 	return objects[id]
 }
 
-var boundary = structs.Boundaries{10, 10, 790, 590}
+var boundary = structs.Boundaries{10, 10, 1910, 1070}
 
 func listen(conn *websocket.Conn) {
 	for {
@@ -121,6 +115,9 @@ func listen(conn *websocket.Conn) {
 		case "Sync":
 			sync(messageType, conn)
 			break
+		case "Leave":
+			leave(command, messageType, conn)
+			break
 		default:
 			fmt.Println("Unknown command type:", commandType)
 		}
@@ -129,7 +126,38 @@ func listen(conn *websocket.Conn) {
 	}
 }
 
+//Sync is called even on disconnected players
+//It causes a respawn of the player
+
+func leave(command string, messageType int, conn *websocket.Conn) {
+	var data structs.Player
+	json.Unmarshal([]byte(string(command)), &data)
+	fmt.Println("Player leaved with ID:", data.ID)
+	
+    dataJson, _ := json.Marshal(players[data.ID])
+
+	messageResponse := fmt.Sprintf("Leave: %s", string(dataJson))
+	
+    fmt.Println("Sending message: %s", string(dataJson))
+
+	for connection := range connections {
+		if err := connection.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+			log.Println(err)
+			return
+		}
+	}
+	
+	removePlayer(data.ID)
+	connections[conn] = false
+}
+
 func sync(messageType int, conn *websocket.Conn) {
+
+    if len(players) == 0 {
+        fmt.Println("No players")
+        return
+    }
+    
 	fmt.Println("Syncing")
 
 	playerValues := make([]structs.Player, 0, len(players))
@@ -138,19 +166,24 @@ func sync(messageType int, conn *websocket.Conn) {
 		playerValues = append(playerValues, *v)
 		break
 	}
-    
-    values, _ := json.Marshal(playerValues[0])
-    
-    fmt.Println("Values:", string(values))
-    
-    messageResponse := fmt.Sprintf("Sync: %s", string(values))
-    
-    for connection := range connections {
-        if err := connection.WriteMessage(messageType, []byte(messageResponse)); err != nil {
-            log.Println(err)
+
+	values, _ := json.Marshal(playerValues[0])
+
+	fmt.Println("Values:", string(values))
+
+	messageResponse := fmt.Sprintf("Sync: %s", string(values))
+
+	for connection := range connections {
+	    if connections[conn] == false {
+            fmt.Println("Connection closed")
             return
-        }    
-    } 
+	    }
+	    
+		if err := connection.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+			log.Println(err)
+			return
+		}
+	}
 }
 
 func join(command string, conn *websocket.Conn) {
@@ -163,7 +196,7 @@ func join(command string, conn *websocket.Conn) {
 	dataJson, _ := json.Marshal(players)
 
 	messageResponse := fmt.Sprintf("Join: %s", dataJson)
-	
+
 	connections[conn] = true
 
 	if err := conn.WriteMessage(1, []byte(messageResponse)); err != nil {

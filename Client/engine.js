@@ -5,12 +5,11 @@ import {ctx, render} from "./renderer.js";
 
 export const playerEntities = new Map();
 
-export function getPlayers() {
+export function getPlayerEntities() {
     return playerEntities;
 }
 
-export function createPlayer(id) 
-{
+export function createPlayer(id) {
     if (playerEntities.has(id)) {
         console.log("Player already exists: " + id);
         return playerEntities.get(id);
@@ -19,6 +18,13 @@ export function createPlayer(id)
     console.log("create player " + id);
     playerEntities.set(id, playerEntity);
     return playerEntity;
+}
+
+export function removePlayer(id) {
+    if (playerEntities.has(id)) {
+        console.log("Player removed: " + id);
+        playerEntities.delete(id);
+    }
 }
 
 export function moveCallback(data) {
@@ -70,6 +76,15 @@ window.addEventListener('keydown', function (event) {
     } else if (key === "d") {
         data.horizontal = 1;
         sendToServer(data, Constants.commands.move);
+    }
+    
+    if (key === "Escape") {
+        
+        const player = {
+            id: getLocalId()
+        }
+        
+        sendToServer(player, Constants.commands.leave);
     }
 });
 
