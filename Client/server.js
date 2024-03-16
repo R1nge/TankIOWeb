@@ -63,22 +63,19 @@ socket.onmessage = function (event) {
 
     if (event.data.startsWith(Constants.commands.sync)) {
         console.log(`Sync message received: ${parsedData}`);
-
         console.log(`Player ${parsedData.id} ${parsedData.x} ${parsedData.y}`);
 
-
         createPlayer(parsedData.id);
-
-
+        
         const player = getPlayerEntities().get(parsedData.id);
         if (!player) {
             console.log(`Player ${parsedData.id} not found`);
             return;
-
         }
         
         player.x = parsedData.x;
         player.y = parsedData.y;
+        player.rotationAngle = parsedData.rotationAngle;
 
         return;
     }

@@ -13,6 +13,7 @@ type Player struct {
     ID int `json:"id"`
     PositionX int `json:"x"`
     PositionY int `json:"y"`
+    Rotation float64 `json:"rotationAngle"`
     Name string `json:"name"`
     Speed int
 }

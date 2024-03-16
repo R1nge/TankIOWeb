@@ -30,25 +30,7 @@ export function removePlayer(id) {
 export function moveCallback(data) {
     const playerEntity = playerEntities.get(data.id);
 
-    //Move right
-    if (playerEntity.x < data.x) {
-        playerEntity.rotate(0);
-    }
-
-    //Move left
-    if (playerEntity.x > data.x) {
-        playerEntity.rotate(Math.PI);
-    }
-
-    //Move Down
-    if (playerEntity.y < data.y) {
-        playerEntity.rotate(Math.PI / 2);
-    }
-
-    //Move Up
-    if (playerEntity.y > data.y) {
-        playerEntity.rotate(-Math.PI / 2);
-    }
+ 
 }
 
 window.addEventListener('keydown', function (event) {
@@ -78,18 +60,20 @@ window.addEventListener('keydown', function (event) {
         sendToServer(data, Constants.commands.move);
     }
     
-    if (key === "Escape") {
-        
-        const player = {
-            id: getLocalId()
-        }
-        
-        sendToServer(player, Constants.commands.leave);
-    }
+    // if (key === "Escape") {
+    //    
+    //     const player = {
+    //         id: getLocalId()
+    //     }
+    //    
+    //     sendToServer(player, Constants.commands.leave);
+    // }
 });
 
 function gameLoop() {
     render(Constants.deltaTime);
+    //requestAnimationFrame(gameLoop);
 }
 
+//requestAnimationFrame(gameLoop);
 setInterval(gameLoop, Constants.deltaTime);

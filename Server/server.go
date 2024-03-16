@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
+	"math"
 	"net/http"
 	"server/m/v2/utils"
 	"strings"
@@ -51,11 +52,11 @@ func addPlayer(player structs.Player) {
 }
 
 func removePlayer(id int) {
-    if players[id] == nil {
-        fmt.Println("Player not found:", id)
-        return
-    }
-    fmt.Println("Removing player:", id)
+	if players[id] == nil {
+		fmt.Println("Player not found:", id)
+		return
+	}
+	fmt.Println("Removing player:", id)
 	delete(players, id)
 }
 
@@ -116,7 +117,7 @@ func listen(conn *websocket.Conn) {
 			sync(messageType, conn)
 			break
 		case "Leave":
-			leave(command, messageType, conn)
+			//leave(command, messageType, conn)
 			break
 		default:
 			fmt.Println("Unknown command type:", commandType)
@@ -133,12 +134,12 @@ func leave(command string, messageType int, conn *websocket.Conn) {
 	var data structs.Player
 	json.Unmarshal([]byte(string(command)), &data)
 	fmt.Println("Player leaved with ID:", data.ID)
-	
-    dataJson, _ := json.Marshal(players[data.ID])
+
+	dataJson, _ := json.Marshal(players[data.ID])
 
 	messageResponse := fmt.Sprintf("Leave: %s", string(dataJson))
-	
-    fmt.Println("Sending message: %s", string(dataJson))
+
+	fmt.Println("Sending message: %s", string(dataJson))
 
 	for connection := range connections {
 		if err := connection.WriteMessage(messageType, []byte(messageResponse)); err != nil {
@@ -146,18 +147,18 @@ func leave(command string, messageType int, conn *websocket.Conn) {
 			return
 		}
 	}
-	
+
 	removePlayer(data.ID)
 	connections[conn] = false
 }
 
 func sync(messageType int, conn *websocket.Conn) {
 
-    if len(players) == 0 {
-        fmt.Println("No players")
-        return
-    }
-    
+	if len(players) == 0 {
+		fmt.Println("No players")
+		return
+	}
+
 	fmt.Println("Syncing")
 
 	playerValues := make([]structs.Player, 0, len(players))
@@ -174,11 +175,11 @@ func sync(messageType int, conn *websocket.Conn) {
 	messageResponse := fmt.Sprintf("Sync: %s", string(values))
 
 	for connection := range connections {
-	    if connections[conn] == false {
-            fmt.Println("Connection closed")
-            return
-	    }
-	    
+		if connections[conn] == false {
+			fmt.Println("Connection closed")
+			continue
+		}
+
 		if err := connection.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 			log.Println(err)
 			return
@@ -261,12 +262,35 @@ func move(command string, messageType int, conn *websocket.Conn) {
 
 	player.Speed = 5
 
+	previousX := player.PositionX
+	previousY := player.PositionY
+
 	if player.PositionX+player.Speed*int(data.Horizontal) > boundary.MinX && player.PositionX+player.Speed*int(data.Horizontal) < boundary.MaxX {
 		player.PositionX += player.Speed * int(data.Horizontal)
 	}
 
 	if player.PositionY-player.Speed*int(data.Vertical) > boundary.MinY && player.PositionY-player.Speed*int(data.Vertical) < boundary.MaxY {
 		player.PositionY -= player.Speed * int(data.Vertical)
+	}
+
+	//Rotate right
+	if previousX < player.PositionX {
+		player.Rotation = 0
+	}
+
+	//Rotate left
+	if previousX > player.PositionX {
+		player.Rotation = math.Pi
+	}
+
+	//Rotate Down
+	if previousY < player.PositionY {
+		player.Rotation = math.Pi / 2
+	}
+
+	//Rotate Up
+	if previousY > player.PositionY {
+		player.Rotation = -math.Pi / 2
 	}
 
 	fmt.Println("Player position:", player.PositionX, player.PositionY)
