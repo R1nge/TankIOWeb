@@ -14,7 +14,11 @@ function renderPlayers() {
     }
 
     for (const playerEntity of getPlayers().values()) {
+        if (playerEntity === undefined || playerEntity.id === undefined) {
+            continue;
+        }
+        
         playerEntity.draw(ctx);
-        console.log(playerEntity.id)
+        //console.log("Draw player: " + playerEntity.id);
     }
 }

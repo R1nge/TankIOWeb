@@ -12,7 +12,8 @@
             join: "Join",
             create: "Create",
             move: "Move",
-            leave: "Leave"
+            leave: "Leave",
+            sync: "Sync"
         }
     }
 }

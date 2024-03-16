@@ -3,21 +3,22 @@ import {getLocalId, sendToServer} from "./server.js";
 import {PlayerEntity} from "./playerEntity.js";
 import {ctx, render} from "./renderer.js";
 
-const playerEntities = new Map();
+export const playerEntities = new Map();
 
 export function getPlayers() {
     return playerEntities;
 }
 
-export function createPlayer(id) {
+export function createPlayer(id) 
+{
+    if (playerEntities.has(id)) {
+        console.log("Player already exists: " + id);
+        return playerEntities.get(id);
+    }
     const playerEntity = new PlayerEntity(id, ctx.canvas.width / 2, ctx.canvas.height / 2, 0);
     console.log("create player " + id);
     playerEntities.set(id, playerEntity);
     return playerEntity;
-}
-
-export function joinCallback(data) {
-    
 }
 
 export function moveCallback(data) {

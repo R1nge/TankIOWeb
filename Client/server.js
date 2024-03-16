@@ -30,7 +30,7 @@ socket.onopen = function (e) {
 socket.onmessage = function (event) {
     //trim everything before the {
     const data = event.data.substring(event.data.indexOf("{"));
-    console.log(data);
+    console.log(`Message received: ${data}`);
     const parsedData = JSON.parse(data);
     
     if (event.data.startsWith(Constants.commands.join)) {
@@ -49,10 +49,45 @@ socket.onmessage = function (event) {
     }
 
     if (event.data.startsWith(Constants.commands.move)) {
+        const player = getPlayers().get(parsedData.id);
+        if (!player) {
+            console.log(`Player ${parsedData.id} not found`);
+            return;
+        }
         moveCallback(parsedData);
-        getPlayers().get(parsedData.id).x = parsedData.x;
-        getPlayers().get(parsedData.id).y = parsedData.y;
+        player.x = parsedData.x;
+        player.y = parsedData.y;
         console.log(`Move message received: ${parsedData.id} ${parsedData.x} ${parsedData.y}`);
+        return;
+    }
+    
+    if (event.data.startsWith(Constants.commands.sync)) {
+        console.log(`Sync message received: ${parsedData}`);
+
+        console.log(`Player ${parsedData.id} ${parsedData.x} ${parsedData.y}`);
+
+
+        createPlayer(parsedData.id);
+
+
+        const player = getPlayers().get(parsedData.id);
+        if (!player) {
+            console.log(`Player ${parsedData.id} not found`);
+            return;
+
+        }
+        player.x = parsedData.x;
+        
+        player.y = parsedData.y;
+        
+        // for (const player of getPlayers().values()) {
+        //     sendToServer({
+        //         id: player.id,
+        //         x: player.x,
+        //         y: player.y
+        //     }, Constants.commands.sync);
+        // }
+        
         return;
     }
 

@@ -10,6 +10,24 @@ import (
 	"strings"
 )
 
+var tickrate = 60
+var connections = make(map[*websocket.Conn]bool)
+var broadcast = make(chan []byte)
+
+func handleConnections() {
+    for {
+        conn := <-broadcast
+        for client := range connections {
+            err := client.WriteMessage(1, conn)
+            if err != nil {
+                fmt.Println(err)
+                client.Close()
+                delete(connections, client)
+            }
+        }
+    }
+}
+
 func main() {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -100,10 +118,39 @@ func listen(conn *websocket.Conn) {
 		case "Move":
 			move(command, messageType, conn)
 			break
+		case "Sync":
+			sync(messageType, conn)
+			break
 		default:
 			fmt.Println("Unknown command type:", commandType)
 		}
+
+		sync(messageType, conn)
 	}
+}
+
+func sync(messageType int, conn *websocket.Conn) {
+	fmt.Println("Syncing")
+
+	playerValues := make([]structs.Player, 0, len(players))
+
+	for _, v := range players {
+		playerValues = append(playerValues, *v)
+		break
+	}
+    
+    values, _ := json.Marshal(playerValues[0])
+    
+    fmt.Println("Values:", string(values))
+    
+    messageResponse := fmt.Sprintf("Sync: %s", string(values))
+    
+    for connection := range connections {
+        if err := connection.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+            log.Println(err)
+            return
+        }    
+    } 
 }
 
 func join(command string, conn *websocket.Conn) {
@@ -112,15 +159,17 @@ func join(command string, conn *websocket.Conn) {
 	fmt.Println("Player joined with ID:", data.ID)
 	fmt.Println("Player joined with Name:", data.Name)
 	addPlayer(data)
+
+	dataJson, _ := json.Marshal(players)
+
+	messageResponse := fmt.Sprintf("Join: %s", dataJson)
 	
-    dataJson, _ := json.Marshal(players)
-    
-    messageResponse := fmt.Sprintf("Join: %s", dataJson)
-    
-    if err := conn.WriteMessage(1, []byte(messageResponse)); err != nil {
-        log.Println(err)
-        return
-    }
+	connections[conn] = true
+
+	if err := conn.WriteMessage(1, []byte(messageResponse)); err != nil {
+		log.Println(err)
+		return
+	}
 }
 
 func create(command string, messageType int, conn *websocket.Conn) {
