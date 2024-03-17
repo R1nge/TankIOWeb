@@ -6,14 +6,23 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
 	"server/m/v2/utils"
 	"strings"
+	"time"
 )
 
 var tickrate = 60
 var connections = make(map[*websocket.Conn]bool)
 var broadcast = make(chan []byte)
+
+// Concurrency handling - sending messages
+func Send(c *structs.Connection) error {
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
+	return c.Socket.WriteJSON("")
+}
 
 //TODO:
 //Go routines and channels for syncing
@@ -86,6 +95,12 @@ func getObject(id int) *structs.Object {
 var boundary = structs.Boundaries{10, 10, 1910, 1070}
 
 func listen(conn *websocket.Conn) {
+	// Handling disconnects on the server
+	conn.SetCloseHandler(func(code int, text string) error {
+		log.Printf("Client disconnected with error code %d and text %s", code, text)
+		return nil
+	})
+
 	for {
 		messageType, messageContent, err := conn.ReadMessage()
 
@@ -187,11 +202,25 @@ func sync(messageType int, conn *websocket.Conn) {
 	}
 }
 
+// Random int fun
+func randInt(min int, max int) int {
+	rand.Seed(time.Now().UnixNano())
+	return min + rand.Intn(max-min)
+}
+
 func join(command string, conn *websocket.Conn) {
 	var data structs.Player
 	json.Unmarshal([]byte(string(command)), &data)
 	fmt.Println("Player joined with ID:", data.ID)
 	fmt.Println("Player joined with Name:", data.Name)
+
+	data.PositionX = randInt(10, 1910)
+	data.PositionY = randInt(10, 1070)
+
+	fmt.Println("Player joined with Position:", data.PositionX, data.PositionY)
+
+	data.Collider = structs.BoxCollider{structs.Vector2Int{data.PositionX, data.PositionY}, structs.Vector2Int{-25, -25}, structs.Vector2Int{25, 25}}
+
 	addPlayer(data)
 
 	dataJson, _ := json.Marshal(players)
@@ -265,12 +294,52 @@ func move(command string, messageType int, conn *websocket.Conn) {
 	previousX := player.PositionX
 	previousY := player.PositionY
 
+	canMoveX := false
+	canMoveY := false
+
 	if player.PositionX+player.Speed*int(data.Horizontal) > boundary.MinX && player.PositionX+player.Speed*int(data.Horizontal) < boundary.MaxX {
-		player.PositionX += player.Speed * int(data.Horizontal)
+		canMoveX = true
 	}
 
 	if player.PositionY-player.Speed*int(data.Vertical) > boundary.MinY && player.PositionY-player.Speed*int(data.Vertical) < boundary.MaxY {
+		canMoveY = true
+	}
+
+	for k, v := range players {
+		if k == player.ID {
+			continue
+		}
+
+		futurePositionX := player.PositionX + player.Speed*int(data.Horizontal)
+		futurePositionY := player.PositionY - player.Speed*int(data.Vertical)
+
+		playerMinX := futurePositionX + player.Collider.Start.X
+		playerMaxX := futurePositionX + player.Collider.End.X
+		playerMinY := futurePositionY + player.Collider.Start.Y
+		playerMaxY := futurePositionY + player.Collider.End.Y
+
+		otherPlayerMinX := v.PositionX + v.Collider.Start.X
+		otherPlayerMaxX := v.PositionX + v.Collider.End.X
+		otherPlayerMinY := v.PositionY + v.Collider.Start.Y
+		otherPlayerMaxY := v.PositionY + v.Collider.End.Y
+
+		
+		if playerMaxX > otherPlayerMinX && playerMinX < otherPlayerMaxX && playerMaxY > otherPlayerMinY && playerMinY < otherPlayerMaxY {
+			canMoveX = false
+            canMoveY = false
+		}
+	}
+
+	fmt.Println("\n Collider position: ", player.Collider.Position.X, player.Collider.Position.Y)
+	fmt.Println("\n Collider boundaries: ", player.Collider.Position.X-player.Collider.Start.X, player.Collider.Position.Y-player.Collider.Start.Y, player.Collider.Position.X+player.Collider.End.X, player.Collider.Position.Y+player.Collider.End.Y)
+
+	if canMoveX {
+		player.PositionX += player.Speed * int(data.Horizontal)
+		player.Collider.Position.X = player.PositionX + (player.Collider.Start.X+player.Collider.End.X)/2
+	}
+	if canMoveY {
 		player.PositionY -= player.Speed * int(data.Vertical)
+		player.Collider.Position.Y = player.PositionY + (player.Collider.Start.Y+player.Collider.End.Y)/2
 	}
 
 	//Rotate right
