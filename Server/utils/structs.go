@@ -45,8 +45,7 @@ type Boundaries struct {
 type BoxCollider struct {
     //Kinda the center of the box
     Position  Vector2Int
-    Start     Vector2Int
-    End       Vector2Int
+    Size      Vector2Int
 }
 
 type Connection struct {

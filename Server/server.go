@@ -219,7 +219,7 @@ func join(command string, conn *websocket.Conn) {
 
 	fmt.Println("Player joined with Position:", data.PositionX, data.PositionY)
 
-	data.Collider = structs.BoxCollider{structs.Vector2Int{data.PositionX, data.PositionY}, structs.Vector2Int{-25, -25}, structs.Vector2Int{25, 25}}
+	data.Collider = structs.BoxCollider{structs.Vector2Int{data.PositionX, data.PositionY}, structs.Vector2Int{128, 128}}
 
 	addPlayer(data)
 
@@ -313,33 +313,37 @@ func move(command string, messageType int, conn *websocket.Conn) {
 		futurePositionX := player.PositionX + player.Speed*int(data.Horizontal)
 		futurePositionY := player.PositionY - player.Speed*int(data.Vertical)
 
-		playerMinX := futurePositionX + player.Collider.Start.X
-		playerMaxX := futurePositionX + player.Collider.End.X
-		playerMinY := futurePositionY + player.Collider.Start.Y
-		playerMaxY := futurePositionY + player.Collider.End.Y
+		playerMinX := futurePositionX - player.Collider.Size.X/2
+		playerMaxX := futurePositionX + player.Collider.Size.X/2
+		playerMinY := futurePositionY - player.Collider.Size.Y/2
+		playerMaxY := futurePositionY + player.Collider.Size.Y/2
 
-		otherPlayerMinX := v.PositionX + v.Collider.Start.X
-		otherPlayerMaxX := v.PositionX + v.Collider.End.X
-		otherPlayerMinY := v.PositionY + v.Collider.Start.Y
-		otherPlayerMaxY := v.PositionY + v.Collider.End.Y
+		otherPlayerMinX := v.PositionX - v.Collider.Size.X/2
+		otherPlayerMaxX := v.PositionX + v.Collider.Size.X/2
+		otherPlayerMinY := v.PositionY - v.Collider.Size.Y/2
+		otherPlayerMaxY := v.PositionY + v.Collider.Size.Y/2
 
-		
-		if playerMaxX > otherPlayerMinX && playerMinX < otherPlayerMaxX && playerMaxY > otherPlayerMinY && playerMinY < otherPlayerMaxY {
+		if playerMaxX > otherPlayerMinX &&
+			playerMinX < otherPlayerMaxX &&
+			playerMaxY > otherPlayerMinY &&
+			playerMinY < otherPlayerMaxY {
+
 			canMoveX = false
-            canMoveY = false
+			canMoveY = false
+			break // Once a collision is detected, no need to check further
 		}
 	}
 
 	fmt.Println("\n Collider position: ", player.Collider.Position.X, player.Collider.Position.Y)
-	fmt.Println("\n Collider boundaries: ", player.Collider.Position.X-player.Collider.Start.X, player.Collider.Position.Y-player.Collider.Start.Y, player.Collider.Position.X+player.Collider.End.X, player.Collider.Position.Y+player.Collider.End.Y)
+	//fmt.Println("\n Collider boundaries: ", player.Collider.Position.X-player.Collider.Start.X, player.Collider.Position.Y-player.Collider.Start.Y, player.Collider.Position.X+player.Collider.End.X, player.Collider.Position.Y+player.Collider.End.Y)
 
 	if canMoveX {
 		player.PositionX += player.Speed * int(data.Horizontal)
-		player.Collider.Position.X = player.PositionX + (player.Collider.Start.X+player.Collider.End.X)/2
+		player.Collider.Position.X = player.PositionX + (player.Collider.Size.X / 2)
 	}
 	if canMoveY {
 		player.PositionY -= player.Speed * int(data.Vertical)
-		player.Collider.Position.Y = player.PositionY + (player.Collider.Start.Y+player.Collider.End.Y)/2
+		player.Collider.Position.Y = player.PositionY + (player.Collider.Size.Y / 2)
 	}
 
 	//Rotate right
