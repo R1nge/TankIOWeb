@@ -15,17 +15,6 @@ import (
 
 var tickrate = 60
 var connections = make(map[*websocket.Conn]bool)
-var broadcast = make(chan []byte)
-
-// Concurrency handling - sending messages
-func Send(c *structs.Connection) error {
-	c.Mu.Lock()
-	defer c.Mu.Unlock()
-	return c.Socket.WriteJSON("")
-}
-
-//TODO:
-//Go routines and channels for syncing
 
 func main() {
 	var upgrader = websocket.Upgrader{
@@ -95,13 +84,16 @@ func getObject(id int) *structs.Object {
 var boundary = structs.Boundaries{10, 10, 1910, 1070}
 
 func listen(conn *websocket.Conn) {
+
+	tick := time.Tick(time.Duration(1000/tickrate) * time.Millisecond)
+
 	// Handling disconnects on the server
 	conn.SetCloseHandler(func(code int, text string) error {
 		log.Printf("Client disconnected with error code %d and text %s", code, text)
 		return nil
 	})
 
-	for {
+	for range tick {
 		messageType, messageContent, err := conn.ReadMessage()
 
 		if err != nil {
@@ -129,7 +121,7 @@ func listen(conn *websocket.Conn) {
 			move(command, messageType, conn)
 			break
 		case "Sync":
-			sync(messageType, conn)
+			//sync(messageType, conn)
 			break
 		case "Leave":
 			//leave(command, messageType, conn)
@@ -141,9 +133,6 @@ func listen(conn *websocket.Conn) {
 		sync(messageType, conn)
 	}
 }
-
-//Sync is called even on disconnected players
-//It causes a respawn of the player
 
 func leave(command string, messageType int, conn *websocket.Conn) {
 	var data structs.Player
@@ -180,10 +169,9 @@ func sync(messageType int, conn *websocket.Conn) {
 
 	for _, v := range players {
 		playerValues = append(playerValues, *v)
-		break
 	}
 
-	values, _ := json.Marshal(playerValues[0])
+	values, _ := json.Marshal(playerValues)
 
 	fmt.Println("Values:", string(values))
 
@@ -216,6 +204,9 @@ func join(command string, conn *websocket.Conn) {
 
 	data.PositionX = randInt(10, 1910)
 	data.PositionY = randInt(10, 1070)
+
+	//playerInputBuffer := make([]*structs.PlayerInput, 20)
+	//data.InputBuffer = playerInputBuffer
 
 	fmt.Println("Player joined with Position:", data.PositionX, data.PositionY)
 
@@ -288,6 +279,16 @@ func move(command string, messageType int, conn *websocket.Conn) {
 		fmt.Println("Player not found")
 		return
 	}
+
+	//*player.InputBuffer = append(*player.InputBuffer, &data)
+
+	// 	if len(*player.InputBuffer) <= 0 {
+	// 		fmt.Println("No input")
+	// 		return
+	// 	}
+
+	//input := (*player.InputBuffer)[1:]
+	//player.InputBuffer = &input
 
 	player.Speed = 5
 

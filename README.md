@@ -35,6 +35,9 @@ Send data of each player down at the end of each tick
 Disconnect client
 
 
+Send command type inside json?
+
+
 Rendering
 https://developer.ibm.com/tutorials/wa-canvashtml5layering/
 https://web.dev/articles/canvas-performance

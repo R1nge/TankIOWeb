@@ -2,7 +2,7 @@
 import {Utils} from "./utils.js";
 import {Constants} from "./constants.js";
 
-let socket = new WebSocket("ws://localhost:8080", "echo-protocol");
+let socket = new WebSocket("ws://localhost:8080");
 
 const id = Utils.randomInt(0, 1000);
 
@@ -28,8 +28,12 @@ socket.onopen = function (e) {
 };
 
 socket.onmessage = function (event) {
-    //trim everything before the {
-    const data = event.data.substring(event.data.indexOf("{"));
+    //It won't work if an array was sent
+
+    //TODO: trim the first word from the message
+    //TODO: or just include command to the json
+    //trim before space
+    const data = event.data.substring(event.data.indexOf(" "));
     console.log(`Message received: ${data}`);
     const parsedData = JSON.parse(data);
 
@@ -62,24 +66,23 @@ socket.onmessage = function (event) {
     }
 
     if (event.data.startsWith(Constants.commands.sync)) {
-        console.log(`Sync message received: ${parsedData}`);
-        console.log(`Player ${parsedData.id} ${parsedData.x} ${parsedData.y}`);
-
-        createPlayer(parsedData.id);
-        
-        const player = getPlayerEntities().get(parsedData.id);
-        if (!player) {
-            console.log(`Player ${parsedData.id} not found`);
-            return;
+        for (let i = 0; i < parsedData.length; i++) {
+            console.log(`Sync message received: ${parsedData[i]}`);
+            console.log(`Player ${parsedData[i].id} ${parsedData[i].x} ${parsedData[i].y}`);
+            createPlayer(parsedData[i].id);
+            const player = getPlayerEntities().get(parsedData[i].id);
+            if (!player) {
+                console.log(`Player ${parsedData[i].id} not found`);
+                return;
+            }
+            player.x = parsedData[i].x;
+            player.y = parsedData[i].y;
+            player.rotationAngle = parsedData[i].rotationAngle;
         }
-        
-        player.x = parsedData.x;
-        player.y = parsedData.y;
-        player.rotationAngle = parsedData.rotationAngle;
 
         return;
     }
-    
+
     if (event.data.startsWith(Constants.commands.leave)) {
         console.log(`Leave message received: ${parsedData.id}`);
         removePlayer(parsedData.id);
