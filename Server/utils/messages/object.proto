@@ -1,0 +1,11 @@
+﻿syntax="proto3";
+
+package messages;
+
+option go_package = "./messages";
+
+message Object {
+  int32 id = 1;
+  int32 x = 2;
+  int32 y = 3;
+}

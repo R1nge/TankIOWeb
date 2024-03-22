@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"math"
 	"math/rand"
@@ -11,12 +12,25 @@ import (
 	"server/m/v2/utils"
 	"strings"
 	"time"
+	"server/m/v2/utils/messages"
 )
 
 var tickrate = 60
 var connections = make(map[*websocket.Conn]bool)
 
 func main() {
+
+	fmt.Println("Starting server...")
+
+	o := &messages.Object{
+		Id:        1,
+		X: 1,
+	    Y: 1,
+	}
+
+	data, _ := proto.Marshal(o)
+	fmt.Println(data)
+
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,

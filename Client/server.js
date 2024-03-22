@@ -28,10 +28,6 @@ socket.onopen = function (e) {
 };
 
 socket.onmessage = function (event) {
-    //It won't work if an array was sent
-
-    //TODO: trim the first word from the message
-    //TODO: or just include command to the json
     //trim before space
     const data = event.data.substring(event.data.indexOf(" "));
     console.log(`Message received: ${data}`);
