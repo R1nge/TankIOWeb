@@ -121,12 +121,9 @@ func listen(conn *websocket.Conn) {
 			break
 		case "Move":
 			move(command, messageType, conn)
-			break
-		case "Sync":
-			//sync(messageType, conn)
-			break
+			break	
 		case "Leave":
-			//leave(command, messageType, conn)
+			leave(command, messageType, conn)
 			break
         case "Shoot":
             shoot(command, messageType, conn)

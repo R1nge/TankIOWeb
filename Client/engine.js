@@ -2,6 +2,7 @@
 import {getLocalId, sendToServer} from "./server.js";
 import {PlayerEntity} from "./playerEntity.js";
 import {ctx, render} from "./renderer.js";
+import {Utils} from "./utils.js";
 
 export const playerEntities = new Map();
 
@@ -60,14 +61,31 @@ window.addEventListener('keydown', function (event) {
         sendToServer(data, Constants.commands.move);
     }
     
-    // if (key === "Escape") {
-    //    
-    //     const player = {
-    //         id: getLocalId()
-    //     }
-    //    
-    //     sendToServer(player, Constants.commands.leave);
-    // }
+    if (key === "Escape") {
+
+        const player = {
+            id: getLocalId()
+        }
+
+        sendToServer(player, Constants.commands.leave);
+    }
+    
+    if (key === "Enter") {
+        
+        if (playerEntities.has(getLocalId())) {
+            console.log("Already joined");
+            return;
+        }
+        
+        const player = {
+            id: getLocalId(),
+            name: "R1nge" + Utils.randomInt(0, 1000),
+            mousePositionX: Utils.randomInt(0, ctx.canvas.width),
+            mousePositionY: Utils.randomInt(0, ctx.canvas.height)
+        }
+        
+        sendToServer(player, Constants.commands.join);
+    }
 });
 
 window.addEventListener('click', function (event) {
@@ -82,8 +100,6 @@ window.addEventListener('click', function (event) {
 
 function gameLoop() {
     render(Constants.deltaTime);
-    //requestAnimationFrame(gameLoop);
 }
 
-//requestAnimationFrame(gameLoop);
 setInterval(gameLoop, Constants.deltaTime);
