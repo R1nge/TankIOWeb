@@ -78,6 +78,11 @@ socket.onmessage = function (event) {
 
         return;
     }
+    
+    if (event.data.startsWith(Constants.commands.shoot)) {
+        console.log(`Shoot message received: ${parsedData.id}`);
+        return;
+    }
 
     if (event.data.startsWith(Constants.commands.leave)) {
         console.log(`Leave message received: ${parsedData.id}`);

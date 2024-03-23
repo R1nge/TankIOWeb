@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"math"
 	"math/rand"
@@ -12,24 +11,13 @@ import (
 	"server/m/v2/utils"
 	"strings"
 	"time"
-	"server/m/v2/utils/messages"
 )
 
 var tickrate = 60
 var connections = make(map[*websocket.Conn]bool)
 
 func main() {
-
 	fmt.Println("Starting server...")
-
-	o := &messages.Object{
-		Id:        1,
-		X: 1,
-	    Y: 1,
-	}
-
-	data, _ := proto.Marshal(o)
-	fmt.Println(data)
 
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -140,6 +128,9 @@ func listen(conn *websocket.Conn) {
 		case "Leave":
 			//leave(command, messageType, conn)
 			break
+        case "Shoot":
+            shoot(command, messageType, conn)
+            break
 		default:
 			fmt.Println("Unknown command type:", commandType)
 		}
@@ -219,9 +210,6 @@ func join(command string, conn *websocket.Conn) {
 	data.PositionX = randInt(10, 1910)
 	data.PositionY = randInt(10, 1070)
 
-	//playerInputBuffer := make([]*structs.PlayerInput, 20)
-	//data.InputBuffer = playerInputBuffer
-
 	fmt.Println("Player joined with Position:", data.PositionX, data.PositionY)
 
 	data.Collider = structs.BoxCollider{structs.Vector2Int{data.PositionX, data.PositionY}, structs.Vector2Int{128, 128}}
@@ -293,16 +281,6 @@ func move(command string, messageType int, conn *websocket.Conn) {
 		fmt.Println("Player not found")
 		return
 	}
-
-	//*player.InputBuffer = append(*player.InputBuffer, &data)
-
-	// 	if len(*player.InputBuffer) <= 0 {
-	// 		fmt.Println("No input")
-	// 		return
-	// 	}
-
-	//input := (*player.InputBuffer)[1:]
-	//player.InputBuffer = &input
 
 	player.Speed = 5
 
@@ -391,4 +369,28 @@ func move(command string, messageType int, conn *websocket.Conn) {
 		log.Println(err)
 		return
 	}
+}
+
+func shoot (command string, messageType int, conn *websocket.Conn) {
+
+    var data structs.PlayerInput
+    json.Unmarshal([]byte(string(command)), &data)
+    
+    player := getPlayer(data.ID)
+    
+    if player == nil {
+        fmt.Println("Player not found")
+        return
+    }
+    
+    data.IsShooting = true
+    
+    dataJson, _ := json.Marshal(player)
+    
+    messageResponse := fmt.Sprintf("Shoot: %s", dataJson)
+    
+    if err := conn.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+        log.Println(err)
+        return
+    }
 }

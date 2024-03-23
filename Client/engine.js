@@ -70,6 +70,16 @@ window.addEventListener('keydown', function (event) {
     // }
 });
 
+window.addEventListener('click', function (event) {
+
+    const player = {
+        id: getLocalId(),
+        mousePositionX: event.clientX,
+        mousePositionY: event.clientY
+    }
+    sendToServer(player, Constants.commands.shoot);
+});
+
 function gameLoop() {
     render(Constants.deltaTime);
     //requestAnimationFrame(gameLoop);

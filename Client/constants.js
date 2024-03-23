@@ -13,7 +13,8 @@
             create: "Create",
             move: "Move",
             leave: "Leave",
-            sync: "Sync"
+            sync: "Sync",
+            shoot: "Shoot"
         }
     }
 }
