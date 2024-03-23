@@ -27,16 +27,14 @@ Have a json db
 
 
 TODO:
+
+Handle close connection - send leave message
+
 Use connection id from a socket connection
 Tiled app
 Server tickrate
 Store the input and execute each tick
 Send data of each player down at the end of each tick
-Disconnect client
-
-
-Send command type inside json?
-
 
 Rendering
 https://developer.ibm.com/tutorials/wa-canvashtml5layering/

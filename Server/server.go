@@ -156,6 +156,8 @@ func leave(command string, messageType int, conn *websocket.Conn) {
 
 	removePlayer(data.ID)
 	connections[conn] = false
+	delete(connections, conn)
+	conn.Close()
 }
 
 func sync(messageType int, conn *websocket.Conn) {
