@@ -1,7 +1,6 @@
 package structs
 
 import (
-    "sync"
     "github.com/gorilla/websocket"
 )
 
@@ -50,5 +49,5 @@ type BoxCollider struct {
 
 type Connection struct {
 	Socket *websocket.Conn
-	Mu     sync.Mutex
+	ID     int
 }

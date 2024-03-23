@@ -14,7 +14,7 @@ import (
 )
 
 var tickrate = 60
-var connections = make(map[*websocket.Conn]bool)
+var connections = make(map[*structs.Connection]bool)
 
 func main() {
 	fmt.Println("Starting server...")
@@ -87,6 +87,15 @@ var boundary = structs.Boundaries{10, 10, 1910, 1070}
 
 func listen(conn *websocket.Conn) {
 
+    connection := &structs.Connection {
+        Socket: conn,
+        ID: randInt(1, 1000),
+    }
+    
+    fmt.Println("Connection ID:", connection.ID)
+    
+    connections[connection] = true
+
 	tick := time.Tick(time.Duration(1000/tickrate) * time.Millisecond)
 
 	// Handling disconnects on the server
@@ -114,16 +123,16 @@ func listen(conn *websocket.Conn) {
 
 		switch commandType {
 		case "Join":
-			join(command, conn)
+			join(command, connection)
 			break
 		case "Create":
 			create(command, messageType, conn)
 			break
 		case "Move":
-			move(command, messageType, conn)
+			move(command, messageType, connection)
 			break	
 		case "Leave":
-			leave(command, messageType, conn)
+			leave(command, messageType, connection)
 			break
         case "Shoot":
             shoot(command, messageType, conn)
@@ -132,11 +141,11 @@ func listen(conn *websocket.Conn) {
 			fmt.Println("Unknown command type:", commandType)
 		}
 
-		sync(messageType, conn)
+		sync(messageType, connection)
 	}
 }
 
-func leave(command string, messageType int, conn *websocket.Conn) {
+func leave(command string, messageType int, conn *structs.Connection) {
 	var data structs.Player
 	json.Unmarshal([]byte(string(command)), &data)
 	fmt.Println("Player leaved with ID:", data.ID)
@@ -148,7 +157,7 @@ func leave(command string, messageType int, conn *websocket.Conn) {
 	fmt.Println("Sending message: %s", string(dataJson))
 
 	for connection := range connections {
-		if err := connection.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+		if err := connection.Socket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 			log.Println(err)
 			return
 		}
@@ -157,10 +166,10 @@ func leave(command string, messageType int, conn *websocket.Conn) {
 	removePlayer(data.ID)
 	connections[conn] = false
 	delete(connections, conn)
-	conn.Close()
+	conn.Socket.Close()
 }
 
-func sync(messageType int, conn *websocket.Conn) {
+func sync(messageType int, conn *structs.Connection) {
 
 	if len(players) == 0 {
 		fmt.Println("No players")
@@ -187,7 +196,7 @@ func sync(messageType int, conn *websocket.Conn) {
 			continue
 		}
 
-		if err := connection.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+		if err := connection.Socket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 			log.Println(err)
 			return
 		}
@@ -200,9 +209,10 @@ func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
 
-func join(command string, conn *websocket.Conn) {
+func join(command string, conn *structs.Connection) {
 	var data structs.Player
 	json.Unmarshal([]byte(string(command)), &data)
+	data.ID = conn.ID
 	fmt.Println("Player joined with ID:", data.ID)
 	fmt.Println("Player joined with Name:", data.Name)
 
@@ -221,7 +231,7 @@ func join(command string, conn *websocket.Conn) {
 
 	connections[conn] = true
 
-	if err := conn.WriteMessage(1, []byte(messageResponse)); err != nil {
+	if err := conn.Socket.WriteMessage(1, []byte(messageResponse)); err != nil {
 		log.Println(err)
 		return
 	}
@@ -246,7 +256,7 @@ func create(command string, messageType int, conn *websocket.Conn) {
 	}
 }
 
-func move(command string, messageType int, conn *websocket.Conn) {
+func move(command string, messageType int, conn *structs.Connection) {
 	var data structs.PlayerInput
 
 	json.Unmarshal([]byte(string(command)), &data)
@@ -267,17 +277,17 @@ func move(command string, messageType int, conn *websocket.Conn) {
 		data.Vertical = -1
 	}
 
-	fmt.Printf("ID: %d ", data.ID)
+	fmt.Printf("ID: %d ", conn.ID)
 	fmt.Printf("Horizontal: %f ", data.Horizontal)
 	fmt.Printf("Vertical: %f ", data.Vertical)
 	fmt.Printf("IsShooting: %t ", data.IsShooting)
 	fmt.Printf("MouseX: %f ", data.MousePositionX)
 	fmt.Printf("MouseY: %f ", data.MousePositionY)
 
-	player := getPlayer(data.ID)
+	player := getPlayer(conn.ID)
 
 	if player == nil {
-		fmt.Println("Player not found")
+		fmt.Println("\n Player not found")
 		return
 	}
 
@@ -364,7 +374,7 @@ func move(command string, messageType int, conn *websocket.Conn) {
 
 	messageResponse := fmt.Sprintf("Move: %s", dataJson)
 
-	if err := conn.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+	if err := conn.Socket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 		log.Println(err)
 		return
 	}

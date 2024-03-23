@@ -1,5 +1,5 @@
 ﻿import {Constants} from "./constants.js";
-import {getLocalId, sendToServer} from "./server.js";
+import {localId, sendToServer} from "./server.js";
 import {PlayerEntity} from "./playerEntity.js";
 import {ctx, render} from "./renderer.js";
 import {Utils} from "./utils.js";
@@ -30,14 +30,12 @@ export function removePlayer(id) {
 
 export function moveCallback(data) {
     const playerEntity = playerEntities.get(data.id);
-
- 
 }
 
 window.addEventListener('keydown', function (event) {
 
     let data = {
-        id: getLocalId(),
+        id: localId,
         horizontal: 0,
         vertical: 0,
         isShooting: false,
@@ -60,30 +58,30 @@ window.addEventListener('keydown', function (event) {
         data.horizontal = 1;
         sendToServer(data, Constants.commands.move);
     }
-    
+
     if (key === "Escape") {
 
         const player = {
-            id: getLocalId()
+            id: localId
         }
 
         sendToServer(player, Constants.commands.leave);
     }
-    
+
     if (key === "Enter") {
         
-        if (playerEntities.has(getLocalId())) {
+        if (playerEntities.has(localId)) {
             console.log("Already joined");
             return;
         }
         
         const player = {
-            id: getLocalId(),
+            id: localId,
             name: "R1nge" + Utils.randomInt(0, 1000),
             mousePositionX: Utils.randomInt(0, ctx.canvas.width),
             mousePositionY: Utils.randomInt(0, ctx.canvas.height)
         }
-        
+
         sendToServer(player, Constants.commands.join);
     }
 });
@@ -91,7 +89,7 @@ window.addEventListener('keydown', function (event) {
 window.addEventListener('click', function (event) {
 
     const player = {
-        id: getLocalId(),
+        id: localId,
         mousePositionX: event.clientX,
         mousePositionY: event.clientY
     }

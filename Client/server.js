@@ -1,24 +1,14 @@
 ﻿import {createPlayer, getPlayerEntities, moveCallback, removePlayer} from "./engine.js";
-import {Utils} from "./utils.js";
 import {Constants} from "./constants.js";
 
 let socket = new WebSocket("ws://localhost:8080");
 
-const id = Utils.randomInt(0, 1000);
-
-export function getLocalId() {
-    return id;
-}
-
-const localPlayer = createPlayer(getLocalId());
+export let localId = 0;
 
 socket.onopen = function (e) {
-    console.log(`Connected to server. Data sent: ${localPlayer}`);
+    console.log(`Connected to server`);
 
     const loginData = {
-        id: getLocalId(),
-        x: localPlayer.x,
-        y: localPlayer.y,
         name: "R1nge"
     }
 
@@ -34,11 +24,12 @@ socket.onmessage = function (event) {
     const parsedData = JSON.parse(data);
 
     if (event.data.startsWith(Constants.commands.join)) {
-        if (parsedData.id === getLocalId()) {
-            console.log("Already joined");
-            return;
-        }
         console.log("Join message received: " + parsedData.id);
+        
+        if (localId === 0) {
+            localId = parsedData.id;
+        }
+        
         createPlayer(parsedData.id);
         return;
     }
@@ -49,6 +40,9 @@ socket.onmessage = function (event) {
     }
 
     if (event.data.startsWith(Constants.commands.move)) {
+
+        console.log("Move message received: " + parsedData.id + " " + parsedData.x + " " + parsedData.y);
+        
         const player = getPlayerEntities().get(parsedData.id);
         if (!player) {
             console.log(`Player ${parsedData.id} not found`);
@@ -78,7 +72,7 @@ socket.onmessage = function (event) {
 
         return;
     }
-    
+
     if (event.data.startsWith(Constants.commands.shoot)) {
         console.log(`Shoot message received: ${parsedData.id}`);
         return;
