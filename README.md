@@ -43,6 +43,9 @@ Client always connects with the ID of 0
 And gets the ID from the server
 Probably should make user db, for now it's overkill
 
+For bullets spawn can use a list of objects
+Check the index and allow only bullets id or something
+
 
 Rendering
 https://developer.ibm.com/tutorials/wa-canvashtml5layering/
