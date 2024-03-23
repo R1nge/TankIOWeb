@@ -101,6 +101,29 @@ func listen(conn *websocket.Conn) {
 	// Handling disconnects on the server
 	conn.SetCloseHandler(func(code int, text string) error {
 		log.Printf("Client disconnected with error code %d and text %s", code, text)
+		
+        
+        fmt.Println("Connections:", len(connections))
+       
+       	fmt.Println("Player leaved with ID:", connection.ID)
+       
+       	dataJson, _ := json.Marshal(players[connection.ID])
+       
+       	messageResponse := fmt.Sprintf("Leave: %s", string(dataJson))
+       
+       	fmt.Println("Sending message: %s", string(dataJson))
+        
+        removePlayer(connection.ID)
+        connections[connection] = false
+        delete(connections, connection)   
+       	
+       	for connection := range connections {
+       		if err := connection.Socket.WriteMessage(1, []byte(messageResponse)); err != nil {
+       			log.Println(err)
+       			return err
+       		}
+       	} 
+        
 		return nil
 	})
 
@@ -111,6 +134,8 @@ func listen(conn *websocket.Conn) {
 			log.Println(err)
 			return
 		}
+		
+        fmt.Println("Message type:", messageType)
 
 		fmt.Println("\n")
 
