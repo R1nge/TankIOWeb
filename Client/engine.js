@@ -62,19 +62,22 @@ window.addEventListener('keydown', function (event) {
     if (key === "Escape") {
 
         const player = {
-            id: localId
+            id: localId,
+            name: "R1nge" + Utils.randomInt(0, 1000),
+            mousePositionX: Utils.randomInt(0, ctx.canvas.width),
+            mousePositionY: Utils.randomInt(0, ctx.canvas.height)
         }
 
         sendToServer(player, Constants.commands.leave);
     }
 
     if (key === "Enter") {
-        
+
         if (playerEntities.has(localId)) {
             console.log("Already joined");
             return;
         }
-        
+
         const player = {
             id: localId,
             name: "R1nge" + Utils.randomInt(0, 1000),

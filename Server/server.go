@@ -191,7 +191,7 @@ func leave(command string, messageType int, conn *structs.Connection) {
 	removePlayer(data.ID)
 	connections[conn] = false
 	delete(connections, conn)
-	conn.Socket.Close()
+	//conn.Socket.Close()
 }
 
 func sync(messageType int, conn *structs.Connection) {
@@ -245,12 +245,21 @@ func join(command string, conn *structs.Connection) {
 	data.PositionY = randInt(10, 1070)
 
 	fmt.Println("Player joined with Position:", data.PositionX, data.PositionY)
+	
+	fmt.Println("Player joined: %s", data)
 
 	data.Collider = structs.BoxCollider{structs.Vector2Int{data.PositionX, data.PositionY}, structs.Vector2Int{128, 128}}
 
 	addPlayer(data)
+	
+	// Create an array only with values
+    playersValues := make([]structs.Player, 0, len(players))
+    
+    for _, v := range players {
+        playersValues = append(playersValues, *v)
+    }
 
-	dataJson, _ := json.Marshal(players)
+	dataJson, _ := json.Marshal(playersValues)
 
 	messageResponse := fmt.Sprintf("Join: %s", dataJson)
 
