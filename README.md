@@ -30,11 +30,19 @@ TODO:
 
 Handle close connection - send leave message
 
-Use connection id from a socket connection
+
 Tiled app
 Server tickrate
 Store the input and execute each tick
 Send data of each player down at the end of each tick
+
+DOCS:
+Client/Socket connection id is generated on the server
+From 1 to 1000 CAN CAUSE COLLISIONS
+Client always connects with the ID of 0
+And gets the ID from the server
+Probably should make user db, for now it's overkill
+
 
 Rendering
 https://developer.ibm.com/tutorials/wa-canvashtml5layering/
