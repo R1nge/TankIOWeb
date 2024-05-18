@@ -75,6 +75,8 @@ func addObject(object structs.Object) {
 	}
 }
 
+
+
 func removeObject(id int) {
 	delete(objects, id)
 }
@@ -86,88 +88,79 @@ func getObject(id int) *structs.Object {
 var boundary = structs.Boundaries{10, 10, 1910, 1070}
 
 func listen(conn *websocket.Conn) {
-
-    connection := &structs.Connection {
+    connection := &structs.Connection{
         Socket: conn,
-        ID: randInt(1, 1000),
+        ID:     randInt(1, 1000),
     }
-    
+
     fmt.Println("Connection ID:", connection.ID)
-    
+
     connections[connection] = true
+    disconnectChan := make(chan *structs.Connection)
+    messageChan := make(chan string)
 
-	tick := time.Tick(time.Duration(1000/tickrate) * time.Millisecond)
+    // Goroutine to handle incoming messages
+    go func() {
+        for {
+            messageType, messageContent, err := conn.ReadMessage()
+            if err != nil {
+                log.Println(err)
+                disconnectChan <- connection
+                break
+            }
 
-	// Handling disconnects on the server
-	conn.SetCloseHandler(func(code int, text string) error {
-		log.Printf("Client disconnected with error code %d and text %s", code, text)
-		
-        
-        fmt.Println("Connections:", len(connections))
-       
-       	fmt.Println("Player leaved with ID:", connection.ID)
-       
-       	dataJson, _ := json.Marshal(players[connection.ID])
-       
-       	messageResponse := fmt.Sprintf("Leave: %s", string(dataJson))
-       
-       	fmt.Println("Sending message: %s", string(dataJson))
-        
-        removePlayer(connection.ID)
-        connections[connection] = false
-        delete(connections, connection)   
-       	
-       	for connection := range connections {
-       		if err := connection.Socket.WriteMessage(1, []byte(messageResponse)); err != nil {
-       			log.Println(err)
-       			return err
-       		}
-       	} 
-        
-		return nil
-	})
+            // Process the message and send a response to the messageChan
+            processMessage(messageType, messageContent, connection, messageChan)
+        }
+    }()
 
-	for range tick {
-		messageType, messageContent, err := conn.ReadMessage()
+    // Goroutine to handle disconnects and broadcast messages
+    go func() {
+        for {
+            select {
+            case <-disconnectChan:
+                removePlayer(connection.ID)
+                connections[connection] = false
+                delete(connections, connection)
+                broadcastMessage(fmt.Sprintf("Player leaved with ID: %d", connection.ID))
+                return // Ends the goroutine
+            case msg := <-messageChan:
+                broadcastMessage(msg)
+            }
+        }
+    }()
+}
 
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		
-        fmt.Println("Message type:", messageType)
+func broadcastMessage(message string) {
+    for connection := range connections {
+        if err := connection.Socket.WriteMessage(1, []byte(message)); err != nil {
+            log.Println(err)
+        }
+    }
+}
 
-		fmt.Println("\n")
+func processMessage(messageType int, messageContent []byte, connection *structs.Connection, messageChan chan string) {
+    fmt.Println("Received message:", string(messageContent))
+    commandType := strings.Split(string(messageContent), "{")[0]
+    command := "{" + strings.SplitN(string(messageContent), "{", 2)[1]
 
-		fmt.Println("Received message:", string(messageContent))
-		commandType := strings.Split(string(messageContent), "{")[0]
-		fmt.Println("Command type:", commandType)
-		command := strings.Split(string(messageContent), "{")[1]
-		command = "{" + command
-		fmt.Println("Command:", command)
+    switch commandType {
+    case "Join":
+        join(command, connection)
+    case "Create":
+        create(command, messageType, connection.Socket)
+    case "Move":
+        move(command, messageType, connection)
+    case "Leave":
+        leave(command, messageType, connection)
+    case "Shoot":
+        shoot(command, messageType, connection.Socket)
+    default:
+        fmt.Println("Unknown command type:", commandType)
+    }
 
-		switch commandType {
-		case "Join":
-			join(command, connection)
-			break
-		case "Create":
-			create(command, messageType, conn)
-			break
-		case "Move":
-			move(command, messageType, connection)
-			break	
-		case "Leave":
-			leave(command, messageType, connection)
-			break
-        case "Shoot":
-            shoot(command, messageType, conn)
-            break
-		default:
-			fmt.Println("Unknown command type:", commandType)
-		}
-
-		sync(messageType, connection)
-	}
+    sync(messageType, connection)
+    messageChan <- "Processed message for connection ID: " + fmt.Sprintf("%d", connection.ID)
 }
 
 func leave(command string, messageType int, conn *structs.Connection) {

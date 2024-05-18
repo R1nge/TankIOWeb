@@ -21,6 +21,11 @@ export function createPlayer(id) {
     return playerEntity;
 }
 
+export function shoot(radius, x, y) {
+    let bullet = new BulletEntity(radius, x, y);
+    
+}
+
 export function removePlayer(id) {
     if (playerEntities.has(id)) {
         console.log("Player removed: " + id);

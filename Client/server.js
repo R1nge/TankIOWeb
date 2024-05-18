@@ -1,4 +1,4 @@
-﻿import {createPlayer, getPlayerEntities, moveCallback, removePlayer} from "./engine.js";
+﻿import {createPlayer, getPlayerEntities, moveCallback, removePlayer, shoot} from "./engine.js";
 import {Constants} from "./constants.js";
 
 let socket = new WebSocket("ws://localhost:8080");
@@ -75,6 +75,7 @@ socket.onmessage = function (event) {
 
     if (event.data.startsWith(Constants.commands.shoot)) {
         console.log(`Shoot message received: ${parsedData.id}`);
+        shoot();
         return;
     }
 
